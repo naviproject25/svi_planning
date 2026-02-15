@@ -88,14 +88,6 @@ export function Login() {
           }}>
             Light-SVI 진단 시스템
           </h1>
-          <p style={{
-            textAlign: 'center',
-            color: '#718096',
-            marginBottom: '40px',
-            fontSize: '0.95em'
-          }}>
-            Light-SVI 진단 시스템
-          </p>
 
           {error && (
             <div style={{
