@@ -2,15 +2,15 @@
 const FIXED_USERS = [
   {
     id: 'admin-001',
-    email: 'admin@test.com',
-    password: 'admin123',
+    username: 'admin',
+    password: 'thtuffoq2026@',
     name: '관리자',
     isAdmin: true
   },
   {
     id: 'user-001',
-    email: 'user@test.com',
-    password: 'user123',
+    username: 'user',
+    password: 'user2026',
     name: '일반사용자',
     isAdmin: false
   }
@@ -18,14 +18,14 @@ const FIXED_USERS = [
 
 export interface User {
   id: string;
-  email: string;
+  username: string;
   name: string;
   isAdmin: boolean;
 }
 
 // 로그인
-export function signIn(email: string, password: string): User | null {
-  const user = FIXED_USERS.find(u => u.email === email && u.password === password);
+export function signIn(username: string, password: string): User | null {
+  const user = FIXED_USERS.find(u => u.username === username && u.password === password);
   
   if (user) {
     const { password: _, ...userWithoutPassword } = user;

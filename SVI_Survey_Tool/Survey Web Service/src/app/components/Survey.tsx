@@ -91,7 +91,7 @@ const surveyQuestions: SurveyQuestion[] = [
     type: 'radio',
     question: '사회적경제기업과 협력활동에 관한 질문입니다',
     options: [
-      { value: 1, label: '1. 사회적경제기업 사자 모임(협의회)이 있는지 모른다' },
+      { value: 1, label: '1. 사회적경제기업 당사자 모임(협의회)이 있는지 모른다' },
       { value: 2, label: '2. 사회적경제기업 당사자 모임(협의회)이 있는지는 알고 있으나 활동하진 않는다' },
       { value: 3, label: '3. 사회적경제기업 당사자 모임(협의회)의 회원이며 회의에 참석한다' },
       { value: 4, label: '4. 사회적경제기업 당사자 모임(협의회)의 회원으로 기업들 간 봉사활동, 공동사업, 마켓운영 등 협력사업을 연 1회 이상 진행한다' }
@@ -168,7 +168,7 @@ const surveyQuestions: SurveyQuestion[] = [
   {
     id: 'q11',
     type: 'radio',
-    question: '고용계획에 관한 질문입니다 (※유급근로자란 4대보험 가입 기준 고인)',
+    question: '고용계획에 관한 질문입니다 (※유급근로자란 4대보험 가입 기준 고용인)',
     options: [
       { value: 1, label: '1. 현재 유급근로자가 없으며, 향후 6개월 내 고용 계획이 없다' },
       { value: 2, label: '2. 현재 유급근로자가 없으나, 향후 6개월 내 고용 계획이 있다' },
@@ -270,15 +270,13 @@ export function Survey() {
   });
   const [companyName, setCompanyName] = useState('');
   const [author, setAuthor] = useState('');
+  const [mentor, setMentor] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [editingSurveyId, setEditingSurveyId] = useState<string | null>(null);
   const navigate = useNavigate();
   const auth = useAuth();
-
-  // 설문 타입은 기본값으로 자동 설정 (관리자 페이지에서만 필터링 용도)
-  const surveyType = '기업 자가진단 (초기창업형)';
 
   // 관리자는 설문 페이지에 접근 불가, 관리자 페이지로 리다이렉트
   useEffect(() => {
@@ -304,6 +302,7 @@ export function Survey() {
           setDate(surveyToEdit.date);
           setCompanyName(surveyToEdit.companyName);
           setAuthor(surveyToEdit.author);
+          setMentor(surveyToEdit.mentor);
           setResponses(surveyToEdit.responses);
         }
       }
@@ -332,8 +331,8 @@ export function Survey() {
 
   const handleSubmit = () => {
     // Check if all fields are filled
-    if (!companyName || !author) {
-      setError('기업명과 작성자를 입력해주세요.');
+    if (!companyName || !author || !mentor) {
+      setError('기업명, 작성자, 멘토를 모두 입력해주세요.');
       return;
     }
 
@@ -364,8 +363,8 @@ export function Survey() {
             date,
             companyName,
             author,
+            mentor,
             responses,
-            surveyType,
             updatedAt: new Date().toISOString()
           };
         }
@@ -386,8 +385,9 @@ export function Survey() {
         date,
         companyName,
         author,
+        mentor,
         responses,
-        surveyType,
+        surveyType: 'light-svi', // 현재는 Light-SVI만 지원
         submittedAt: new Date().toISOString()
       };
 
@@ -425,6 +425,10 @@ export function Survey() {
     const authorNames = ['황유덕', '김철수', '이영희', '박민수', '정수진'];
     setAuthor(authorNames[Math.floor(Math.random() * authorNames.length)]);
     
+    // 멘토 랜덤 채우기
+    const mentorNames = ['장덕수', '서일화', '이상기', '황유덕'];
+    setMentor(mentorNames[Math.floor(Math.random() * mentorNames.length)]);
+    
     surveyQuestions.forEach(question => {
       if (question.type === 'binary') {
         autoResponses[question.id] = Math.random() > 0.5 ? '있다' : '없다';
@@ -453,11 +457,14 @@ export function Survey() {
 
   // 초기화 함수
   const handleReset = () => {
-    setResponses({});
-    setCompanyName('');
-    setAuthor('');
-    setDate(new Date().toISOString().split('T')[0]);
-    setError('');
+    if (confirm('모든 입력 내용을 초기화하시겠습니까?')) {
+      setResponses({});
+      setCompanyName('');
+      setAuthor('');
+      setMentor('');
+      setDate(new Date().toISOString().split('T')[0]);
+      setError('');
+    }
   };
 
   const renderQuestion = (question: SurveyQuestion, index: number) => {
@@ -521,7 +528,7 @@ export function Survey() {
           <div className="flex items-start gap-4 mb-5">
             <div 
               className="flex-shrink-0 w-12 h-12 text-white rounded flex items-center justify-center font-bold text-lg"
-              style={{ background: '#5a6f77' }}
+              style={{ background: '#3182ce' }}
             >
               {index}
             </div>
@@ -584,7 +591,7 @@ export function Survey() {
           <div className="flex items-start gap-4 mb-5">
             <div 
               className="flex-shrink-0 w-12 h-12 text-white rounded flex items-center justify-center font-bold text-lg"
-              style={{ background: '#5a6f77' }}
+              style={{ background: '#3182ce' }}
             >
               {index}
             </div>
@@ -642,7 +649,7 @@ export function Survey() {
         <div className="flex items-start gap-4 mb-5">
           <div 
             className="flex-shrink-0 w-12 h-12 text-white rounded flex items-center justify-center font-bold text-lg"
-            style={{ background: '#5a6f77' }}
+            style={{ background: '#3182ce' }}
           >
             {index}
           </div>
@@ -694,52 +701,58 @@ export function Survey() {
 
   return (
     <div className="min-h-screen" style={{ background: '#f5f5f5' }}>
-      {/* 고정 로그아웃 버튼 */}
-      <button
-        onClick={() => {
-          auth.signOut();
-          navigate('/login');
-        }}
-        className="fixed top-6 right-6 z-50 p-3 rounded-full shadow-lg transition-all hover:shadow-xl hover:scale-110"
-        style={{ 
-          background: '#ffffff',
-          border: '1px solid #e2e8f0'
-        }}
-        title="로그아웃"
-      >
-        <LogOut size={20} style={{ color: '#718096' }} />
-      </button>
+      {/* 로그아웃 버튼 - 우측 상단 고정 플로팅 */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        zIndex: 10000
+      }}>
+        <button
+          onClick={() => {
+            auth.signOut();
+            navigate('/login');
+          }}
+          style={{
+            background: 'white',
+            color: '#2d3748',
+            border: '2px solid #e2e8f0',
+            borderRadius: '50%',
+            width: '48px',
+            height: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            transition: 'all 0.3s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.2)';
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
+          <LogOut size={20} />
+        </button>
+      </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
-        <div className="text-white rounded-t-lg shadow-sm px-8 py-12 mb-0 relative" style={{ background: '#5a6f77' }}>
-          <div className="text-center">
-            <h1 className="text-5xl font-black mb-6">
-              기업 자가진단 (초기창업형)
-            </h1>
-            <p className="text-xl font-medium" style={{ opacity: 0.95 }}>
-              Light-SVI 진단툴
-            </p>
-          </div>
-          {auth.user?.isAdmin && (
-            <div className="absolute top-6 right-8">
-              <button
-                onClick={() => navigate('/admin')}
-                className="px-4 py-1.5 text-sm text-white rounded-md font-medium transition-all hover:opacity-80 whitespace-nowrap"
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)'
-                }}
-              >
-                관리자
-              </button>
+        <div className="text-white rounded-t-lg shadow-sm px-8 py-6 mb-0" style={{ background: '#5a7077' }}>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold">기업 자가진단 (초기창업형) - Light-SVI 진단툴</h1>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Info Section */}
         <div className="bg-white border-x px-8 py-6" style={{ borderColor: '#e2e8f0' }}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <Label className="block text-sm font-medium mb-2" style={{ color: '#2d3748' }}>일시:</Label>
               <Input
@@ -762,6 +775,22 @@ export function Survey() {
               />
             </div>
             <div>
+              <Label className="block text-sm font-medium mb-2" style={{ color: '#2d3748' }}>멘토: <span style={{ color: '#e53e3e' }}>*</span></Label>
+              <select
+                value={mentor}
+                onChange={(e) => setMentor(e.target.value)}
+                className="w-full border rounded-md px-3 py-2 bg-white"
+                style={{ borderColor: '#cbd5e0', backgroundColor: 'white', color: mentor ? '#2d3748' : '#a0aec0' }}
+                required
+              >
+                <option value="" disabled>멘토를 선택해주세요</option>
+                <option value="장덕수">장덕수</option>
+                <option value="서일화">서일화</option>
+                <option value="이상기">이상기</option>
+                <option value="황유덕">황유덕</option>
+              </select>
+            </div>
+            <div>
               <Label className="block text-sm font-medium mb-2" style={{ color: '#2d3748' }}>작성자:</Label>
               <Input
                 type="text"
@@ -779,7 +808,7 @@ export function Survey() {
             <div 
               className="h-2 rounded-full transition-all"
               style={{ 
-                background: '#7c9299',
+                background: '#5a7077',
                 width: `${(answeredCount / totalCount) * 100}%` 
               }}
             />
@@ -790,7 +819,7 @@ export function Survey() {
         <div className="bg-white rounded-b-lg shadow-sm pb-8">
           {/* 기본 정보 섹션 */}
           <div className="px-8 pt-8 mb-6">
-            <h3 className="text-xl font-bold mb-4" style={{ color: '#7c9299' }}>기본 정보</h3>
+            <h3 className="text-xl font-bold mb-4" style={{ color: '#5a7077' }}>기본 정보</h3>
             <div className="space-y-4">
               {surveyQuestions.slice(0, 2).map((question, index) => renderQuestion(question, index))}
             </div>
@@ -814,8 +843,8 @@ export function Survey() {
             disabled={loading}
             className="px-12 py-4 text-base text-white rounded-full font-bold transition-all hover:transform hover:-translate-y-1 disabled:opacity-50 disabled:transform-none whitespace-nowrap"
             style={{ 
-              background: '#2d3748',
-              boxShadow: '0 4px 15px rgba(45, 55, 72, 0.4)'
+              background: '#5a7077',
+              boxShadow: '0 4px 15px rgba(90, 112, 119, 0.3)'
             }}
           >
             {loading ? '분석 중...' : '제출 및 보고서 생성'}
@@ -826,14 +855,15 @@ export function Survey() {
         <div className="mt-4 flex justify-center">
           <button
             onClick={handleAutoFill}
-            className="px-4 py-2 text-xs rounded-md font-medium transition-all whitespace-nowrap opacity-60 hover:opacity-100"
+            className="px-4 py-2 text-xs rounded-md font-medium transition-all hover:opacity-80 whitespace-nowrap"
             style={{ 
-              background: '#e8eaed',
-              color: '#5a6c7d',
-              border: '1px solid #cbd5e0'
+              background: '#e2e8f0',
+              color: '#4a5568',
+              border: '1px solid #cbd5e0',
+              opacity: 0.5
             }}
           >
-            자동채우기 (테스트용)
+            자동채우기
           </button>
         </div>
       </div>
