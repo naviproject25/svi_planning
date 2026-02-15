@@ -6,7 +6,7 @@
 
 ```
 1. SVI_Report/       - SVI 보고서 샘플 및 기업 데이터
-2. SVI_Survei_Tool/  - 설문 웹 서비스 (React + Supabase)
+2. SVI_Survey_Tool/  - 설문 웹 서비스 (React + Supabase)
 3. SVI_Chatbot/      - SVI 매뉴얼 자료
 ```
 
