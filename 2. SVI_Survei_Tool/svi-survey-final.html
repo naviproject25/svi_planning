@@ -1,0 +1,2904 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Light-SVI 기업 자가진단</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #4a5568;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .info-section {
+            background: #edf2f7;
+            padding: 20px 30px;
+            border-bottom: 2px solid #cbd5e0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #2d3748;
+            margin-right: 10px;
+            min-width: 80px;
+        }
+
+        .info-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4299e1 0%, #3182ce 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .question-section {
+            margin-bottom: 40px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+
+        .question-section:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: #cbd5e0;
+        }
+
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            background: #4a5568;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-right: 15px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .question-text {
+            flex: 1;
+            font-size: 1.05em;
+            color: #2d3748;
+            font-weight: 600;
+            padding-top: 8px;
+        }
+
+        .options-container {
+            margin-left: 65px;
+        }
+
+        .option-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .option-item:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .option-item.selected {
+            border-color: #3182ce;
+            background: #bee3f8;
+        }
+
+        .option-item input[type="radio"],
+        .option-item input[type="checkbox"] {
+            margin-right: 12px;
+            margin-top: 3px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .option-label {
+            flex: 1;
+            cursor: pointer;
+            color: #2d3748;
+            line-height: 1.5;
+        }
+
+        .scale-options {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .scale-option {
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .scale-option input[type="radio"] {
+            display: none;
+        }
+
+        .scale-option label {
+            display: block;
+            padding: 15px 10px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .scale-option input[type="radio"]:checked + label {
+            background: #3182ce;
+            color: white;
+            border-color: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(49, 130, 206, 0.3);
+        }
+
+        .scale-option label:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .initial-questions {
+            background: #fff5f5;
+            border: 2px solid #fc8181;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .initial-question {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .initial-question-text {
+            font-weight: bold;
+            color: #742a2a;
+            margin-bottom: 10px;
+        }
+
+        .binary-options {
+            display: flex;
+            gap: 15px;
+        }
+
+        .binary-option input[type="radio"] {
+            display: none;
+        }
+
+        .binary-option label {
+            padding: 10px 30px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .binary-option input[type="radio"]:checked + label {
+            background: #c53030;
+            color: white;
+            border-color: #c53030;
+        }
+
+        .binary-option label:hover {
+            border-color: #fc8181;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(49, 130, 206, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 보고서 스타일 - PDF와 동일하게 */
+        .report-page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .report-header-bar {
+            background: #4a5568;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .report-info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .report-info-table td {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+        }
+
+        .report-info-table .label-cell {
+            background: #6b7280;
+            color: white;
+            font-weight: bold;
+            width: 100px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .interview-date-input {
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            font-size: 0.95em;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .interview-date-input:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+
+        .report-summary-box {
+            border: 3px solid #000;
+            padding: 20px;
+            margin: 20px;
+        }
+
+        .report-summary-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .report-main-content {
+            display: grid;
+            grid-template-columns: 50% 50%;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .report-left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .radar-chart-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+            position: relative;
+        }
+
+        .radar-chart-title {
+            font-size: 1.3em;
+            color: #000;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 320px;
+            width: 320px;
+            margin: 0 auto;
+        }
+
+        /* 4분면 배경 */
+        .chart-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            z-index: 0;
+        }
+
+        .chart-quadrant {
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+        }
+
+        .chart-quadrant.management {
+            background-color: rgba(219, 234, 254, 0.35);
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .chart-quadrant.finance {
+            background-color: rgba(254, 243, 199, 0.35);
+            justify-content: flex-start;
+            align-items: flex-end;
+        }
+
+        .chart-quadrant.organization {
+            background-color: rgba(236, 252, 203, 0.35);
+            justify-content: flex-end;
+            align-items: flex-start;
+        }
+
+        .chart-quadrant.svi {
+            background-color: rgba(233, 213, 255, 0.35);
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+
+        .quadrant-label {
+            font-weight: bold;
+            font-size: 1.3em;
+            line-height: 1.3;
+        }
+
+        .quadrant-label.management {
+            color: #1e40af;
+        }
+
+        .quadrant-label.finance {
+            color: #b45309;
+            text-align: right;
+        }
+
+        .quadrant-label.organization {
+            color: #4d7c0f;
+        }
+
+        .quadrant-label.svi {
+            color: #6d28d9;
+            text-align: right;
+        }
+
+        /* 십자 가이드라인 */
+        .chart-crosshair {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .chart-crosshair::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-crosshair::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-wrapper canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .detail-boxes {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .detail-box {
+            border: 2px solid #000;
+            padding: 15px;
+            background: white;
+        }
+
+        .detail-box-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 12px;
+            margin: -15px -15px 12px -15px;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        .detail-box-content {
+            font-size: 0.85em;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .detail-box-title {
+            color: #dc2626;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .report-right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .diagnosis-box {
+            border: 2px solid #1e3a8a;
+            background: white;
+        }
+
+        .diagnosis-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diagnosis-content {
+            padding: 20px;
+            background: #eff6ff;
+            font-size: 0.9em;
+            line-height: 1.8;
+        }
+
+        .bar-chart-section {
+            background: white;
+        }
+
+        .bar-chart-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+
+        .bar-chart-content {
+            padding: 15px;
+        }
+
+        .bar-item {
+            margin-bottom: 12px;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .bar-wrapper {
+            width: 100%;
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.5s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .bar-fill.blue {
+            background: #2563eb;
+        }
+
+        .bar-fill.red {
+            background: #dc2626;
+        }
+
+        .bar-fill.yellow {
+            background: #f59e0b;
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+
+        .status-badge {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .status-badge.blue {
+            background: #2563eb;
+        }
+
+        .status-badge.yellow {
+            background: #f59e0b;
+        }
+
+        .status-badge.red {
+            background: #dc2626;
+        }
+
+        .report-footer {
+            text-align: right;
+            padding: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .opinion-section {
+            margin: 20px;
+            page-break-inside: avoid;
+        }
+
+        .opinion-box {
+            margin-bottom: 20px;
+            border: 2px solid #1e3a8a;
+        }
+
+        .opinion-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .opinion-content {
+            padding: 15px;
+            background: white;
+        }
+
+        .opinion-textarea {
+            width: 100%;
+            min-height: 150px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-size: 0.95em;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            line-height: 1.6;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .opinion-textarea:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+
+        .opinion-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 8mm;
+            }
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                max-width: 100%;
+            }
+            .btn-container {
+                display: none !important;
+            }
+            .interview-date-input {
+                border: none;
+                padding: 0;
+                font-size: 0.85em;
+            }
+            .report-page {
+                box-shadow: none;
+                width: 100%;
+                min-height: auto;
+                max-height: 281mm;
+                padding: 0;
+                margin: 0;
+                page-break-after: avoid;
+            }
+            .report-header-bar {
+                padding: 5px 15px;
+                font-size: 1.1em;
+            }
+            .report-info-table td {
+                padding: 4px 8px;
+                font-size: 0.75em;
+            }
+            .report-summary-box {
+                padding: 8px 12px;
+                margin: 8px 12px;
+                border: 2px solid #000;
+            }
+            .report-summary-text {
+                font-size: 0.75em;
+                line-height: 1.4;
+                margin-bottom: 5px;
+            }
+            .report-main-content {
+                gap: 8px;
+                padding: 8px 12px;
+                page-break-inside: avoid;
+            }
+            .radar-chart-container {
+                padding: 8px;
+            }
+            .radar-chart-title {
+                font-size: 0.9em;
+                margin-bottom: 3px;
+            }
+            .chart-wrapper {
+                height: 150px;
+                width: 150px;
+                margin: 0 auto;
+            }
+            .chart-quadrant {
+                padding: 5px;
+            }
+            .quadrant-label {
+                font-size: 0.8em;
+            }
+            .score-label {
+                font-size: 0.65em;
+                padding: 1px 3px;
+            }
+            .detail-boxes {
+                gap: 5px;
+            }
+            .detail-box {
+                padding: 6px;
+                border: 1px solid #000;
+            }
+            .detail-box-header {
+                padding: 4px 6px;
+                margin: -6px -6px 6px -6px;
+                font-size: 0.65em;
+            }
+            .detail-box-content {
+                font-size: 0.6em;
+                line-height: 1.3;
+            }
+            .report-right-section {
+                gap: 6px;
+            }
+            .diagnosis-box {
+                border: 1px solid #1e3a8a;
+            }
+            .diagnosis-header {
+                padding: 5px 8px;
+                font-size: 0.75em;
+            }
+            .diagnosis-content {
+                padding: 8px;
+                font-size: 0.6em;
+                line-height: 1.4;
+            }
+            .bar-chart-header {
+                padding: 5px 8px;
+                font-size: 0.75em;
+            }
+            .bar-chart-content {
+                padding: 8px;
+            }
+            .bar-item {
+                margin-bottom: 4px;
+            }
+            .bar-label {
+                font-size: 0.6em;
+                margin-bottom: 1px;
+            }
+            .bar-wrapper {
+                height: 12px;
+            }
+            .bar-fill {
+                font-size: 0.55em;
+                padding-right: 4px;
+            }
+            .status-badges {
+                margin-top: 5px;
+                gap: 5px;
+            }
+            .status-badge {
+                width: 24px;
+                height: 24px;
+                font-size: 0.6em;
+            }
+            .report-footer {
+                padding: 8px 12px;
+                font-size: 0.65em;
+            }
+            .opinion-section {
+                margin: 10px 12px;
+            }
+            .opinion-box {
+                margin-bottom: 10px;
+                border: 1px solid #1e3a8a;
+                page-break-inside: avoid;
+            }
+            .opinion-header {
+                padding: 5px 8px;
+                font-size: 0.75em;
+            }
+            .opinion-content {
+                padding: 8px;
+            }
+            .opinion-label {
+                font-size: 0.6em;
+            }
+            .opinion-textarea {
+                min-height: 80px;
+                font-size: 0.7em;
+                border: none;
+                padding: 5px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .info-label {
+                width: 100%;
+            }
+
+            .info-input {
+                width: 100%;
+            }
+
+            .question-card {
+                padding: 15px;
+            }
+
+            .question-text {
+                font-size: 1em;
+            }
+
+            .options {
+                gap: 8px;
+            }
+
+            .option {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            .binary-options {
+                flex-direction: row;
+                gap: 10px;
+            }
+
+            .binary-option {
+                flex: 1;
+                padding: 12px;
+            }
+
+            .submit-button {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            /* 보고서 모바일 스타일 */
+            .report-page {
+                width: 100%;
+                padding: 0;
+            }
+
+            .report-header-bar {
+                padding: 10px 15px;
+                font-size: 1.2em;
+            }
+
+            .report-info-table {
+                font-size: 0.85em;
+            }
+
+            .report-info-table td {
+                padding: 8px 10px;
+            }
+
+            .report-summary-box {
+                padding: 15px;
+                margin: 15px;
+            }
+
+            .report-summary-text {
+                font-size: 0.95em;
+                line-height: 1.6;
+            }
+
+            .report-main-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .radar-chart-container {
+                padding: 15px;
+            }
+
+            .radar-chart-title {
+                font-size: 1.1em;
+            }
+
+            .chart-wrapper {
+                height: 280px;
+                width: 280px;
+            }
+
+            .chart-quadrant {
+                padding: 8px;
+            }
+
+            .quadrant-label {
+                font-size: 1.1em;
+            }
+
+            .score-label {
+                font-size: 0.9em;
+            }
+
+            .detail-boxes {
+                gap: 10px;
+            }
+
+            .detail-box {
+                padding: 12px;
+            }
+
+            .detail-box-header {
+                font-size: 0.9em;
+                padding: 8px 10px;
+            }
+
+            .detail-box-content {
+                font-size: 0.85em;
+                line-height: 1.5;
+            }
+
+            .diagnosis-box {
+                margin-bottom: 10px;
+            }
+
+            .diagnosis-header {
+                font-size: 0.9em;
+                padding: 8px 12px;
+            }
+
+            .diagnosis-content {
+                padding: 12px;
+                font-size: 0.85em;
+                line-height: 1.5;
+            }
+
+            .bar-chart-header {
+                font-size: 0.9em;
+                padding: 8px 12px;
+            }
+
+            .bar-chart-content {
+                padding: 12px;
+            }
+
+            .bar-item {
+                margin-bottom: 8px;
+            }
+
+            .bar-label {
+                font-size: 0.85em;
+                margin-bottom: 4px;
+            }
+
+            .bar-wrapper {
+                height: 18px;
+            }
+
+            .bar-fill {
+                font-size: 0.75em;
+                line-height: 18px;
+            }
+
+            .status-badges {
+                gap: 8px;
+                margin-top: 12px;
+                flex-wrap: wrap;
+            }
+
+            .status-badge {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8em;
+            }
+
+            .opinion-section {
+                margin: 15px;
+            }
+
+            .opinion-box {
+                margin-bottom: 15px;
+            }
+
+            .opinion-header {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            .opinion-label {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+
+            .opinion-textarea {
+                min-height: 120px;
+                font-size: 0.85em;
+                padding: 8px;
+            }
+
+            .interview-date-input {
+                font-size: 0.85em;
+                padding: 4px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>기업 자가진단 (초기창업형)</h1>
+            <p>Light-SVI 진단툴</p>
+        </div>
+
+        <div class="info-section">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">일시:</span>
+                    <input type="date" id="surveyDate" class="info-input" value="">
+                </div>
+                <div class="info-item">
+                    <span class="info-label">기업명:</span>
+                    <input type="text" id="companyName" class="info-input" value="협동조합소셜랩">
+                </div>
+                <div class="info-item">
+                    <span class="info-label">작성자:</span>
+                    <input type="text" id="authorName" class="info-input" value="황유덕">
+                </div>
+            </div>
+        </div>
+
+        <!-- 설문 섹션 -->
+        <div id="surveySection" class="content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <!-- 초기 확인 질문 -->
+            <div class="initial-questions">
+                <h3 style="color: #742a2a; margin-bottom: 20px;">📋 기본 정보</h3>
+
+                <div class="initial-question">
+                    <div class="initial-question-text">과거에 사업경험이 있다</div>
+                    <div class="binary-options">
+                        <div class="binary-option">
+                            <input type="radio" id="exp_yes" name="businessExp" value="있다" onchange="updateProgress()" checked>
+                            <label for="exp_yes">있다</label>
+                        </div>
+                        <div class="binary-option">
+                            <input type="radio" id="exp_no" name="businessExp" value="없다" onchange="updateProgress()">
+                            <label for="exp_no">없다</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="initial-question">
+                    <div class="initial-question-text">해당 업계에 종사한 경험이 있다</div>
+                    <div class="binary-options">
+                        <div class="binary-option">
+                            <input type="radio" id="industry_yes" name="industryExp" value="있다" onchange="updateProgress()" checked>
+                            <label for="industry_yes">있다</label>
+                        </div>
+                        <div class="binary-option">
+                            <input type="radio" id="industry_no" name="industryExp" value="없다" onchange="updateProgress()">
+                            <label for="industry_no">없다</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 질문 1-18 (이전과 동일) -->
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">1</div>
+                    <div class="question-text">해결하고자 하는 사회적문제에 대한 해결방안 계획에 대한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q1', '1')">
+                        <input type="radio" id="q1_1" name="q1" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q1_1">1. 해결하고자 하는 사회적 문제가 있지만 아직 명확하지 않다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q1', '2')">
+                        <input type="radio" id="q1_2" name="q1" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q1_2">2. 해결하고자 하는 사회적 문제가 분명하지만 아직 구체적인 해결 계획은 없다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q1', '3')">
+                        <input type="radio" id="q1_3" name="q1" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q1_3">3. 해결하고자 하는 사회적 문제가 분명하고 구체적인 해결 계획을 가지고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q1', '4')">
+                        <input type="radio" id="q1_4" name="q1" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q1_4">4. 해결하고자 하는 사회적 문제가 분명하고 계획이 구체적이며, 이에 따른 여러가지 시도를 해봤다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">2</div>
+                    <div class="question-text">사업계획에 대한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q2', '1')">
+                        <input type="radio" id="q2_1" name="q2" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q2_1">1. 연초에 사업계획을 세운다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q2', '2')">
+                        <input type="radio" id="q2_2" name="q2" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q2_2">2. 연초에 사업계획을 세우고, 문서화한다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q2', '3')">
+                        <input type="radio" id="q2_3" name="q2" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q2_3">3. 연초에 사업계획을 세우고, 문서화하여 기업 구성원(팀원, 직원 등)과 공유한다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q2', '4')">
+                        <input type="radio" id="q2_4" name="q2" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q2_4">4. 연초 사업계획을 세우고, 문서화하여 기업 구성원과 공유하며, 경제적, 사회적 성과지표가 명확하다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">3</div>
+                    <div class="question-text">근로자들의 보건 및 안전에 대한 관한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q3', '1')">
+                        <input type="radio" id="q3_1" name="q3" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q3_1">1. 업무 수행상 발생가능한 재해(사고, 질병)의 종류와 위치, 상황 등을 거의 확인하지 않고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q3', '2')">
+                        <input type="radio" id="q3_2" name="q3" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q3_2">2. 업무 수행상 발생가능한 재해(사고, 질병)의 종류와 위치, 상황 등을 확인하고 있긴 하나 구체적으로 대비하고 있지 않다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q3', '3')">
+                        <input type="radio" id="q3_3" name="q3" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q3_3">3. 업무 수행상 발생가능한 재해(사고, 질병)의 종류와 위치, 상황 등을 확인하고 있으며, 산업안전보건교육을 포함해 일부를 지원하고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q3', '4')">
+                        <input type="radio" id="q3_4" name="q3" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q3_4">4. 업무 수행상 발생가능한 재해(사고, 질병)의 종류와 위치, 상황 등을 대비하고 있으며, 산업안전보건교육을 포함해 대부분을 지원하고 있다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">4</div>
+                    <div class="question-text">사업의 사회적가치에 관한 질문입니다. 해당사항을 모두 선택해주세요.</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="toggleCheckbox(this, 'q4_1')">
+                        <input type="checkbox" id="q4_1" name="q4" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q4_1">1. 시장에서 목표대상고객(지역)에게 잘 공급되지 않는 제품과 서비스를 공급하고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="toggleCheckbox(this, 'q4_2')">
+                        <input type="checkbox" id="q4_2" name="q4" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q4_2">2. 목표대상고객에게 시장 평균보다 저렴한 가격으로 제품과 서비스를 공급하고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="toggleCheckbox(this, 'q4_3')">
+                        <input type="checkbox" id="q4_3" name="q4" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q4_3">3. 제품과 서비스를 생산하고 판매하기 위해 취약계층을 고용하고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="toggleCheckbox(this, 'q4_4')">
+                        <input type="checkbox" id="q4_4" name="q4" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q4_4">4. 제품과 서비스를 생산하고 판매하는 데 있어서 지역의 자원을 주로 활용하고 있다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">5</div>
+                    <div class="question-text">사회적경제기업과 협력활동에 관한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q5', '1')">
+                        <input type="radio" id="q5_1" name="q5" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q5_1">1. 사회적경제기업 당사자 모임(협의회)이 있는지 모른다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q5', '2')">
+                        <input type="radio" id="q5_2" name="q5" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q5_2">2. 사회적경제기업 당사자 모임(협의회)이 있는지는 알고 있으나 활동하진 않는다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q5', '3')">
+                        <input type="radio" id="q5_3" name="q5" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q5_3">3. 사회적경제기업 당사자 모임(협의회)의 회원이며 회의에 참석한다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q5', '4')">
+                        <input type="radio" id="q5_4" name="q5" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q5_4">4. 사회적경제기업 당사자 모임(협의회)의 회원으로 기업들 간 봉사활동, 공동사업, 마켓운영 등 협력사업을 연 1회 이상 진행한다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">6</div>
+                    <div class="question-text">사회적경제기업과 거래활동에 관한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q6', '1')">
+                        <input type="radio" id="q6_1" name="q6" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q6_1">1. 우리 회사와 사업상 거래를 할 수 있는 사회적경제기업을 모른다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q6', '2')">
+                        <input type="radio" id="q6_2" name="q6" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q6_2">2. 우리 회사와 사업상 거래를 할 수 있는 사회적경제기업을 알고 있으나 거래를 하지는 않았다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q6', '3')">
+                        <input type="radio" id="q6_3" name="q6" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q6_3">3. 사회적경제기업과 협력을 강화하기 위해 상호거래 및 업무협약 등 최근 1년 이내 실행한 사례가 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q6', '4')">
+                        <input type="radio" id="q6_4" name="q6" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q6_4">4. 사회적경제기업과 협력을 강화하기 위해 상호거래 및 업무협약 등 최근 1년 이내 다수 진행하였다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">7</div>
+                    <div class="question-text">지역 네트워크활동에 관한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q7', '1')">
+                        <input type="radio" id="q7_1" name="q7" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q7_1">1. 거래에 있어 지역을 크게 신경쓰지 않는 편이다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q7', '2')">
+                        <input type="radio" id="q7_2" name="q7" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q7_2">2. 우리 지역 기업/기관과 거래하기 위해 탐색한 적은 있지만 아직 거래한 적이 없다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q7', '3')">
+                        <input type="radio" id="q7_3" name="q7" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q7_3">3. 우리 지역 기업/기관과 거래하기 위해 탐색하고 거래를 하였다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q7', '4')">
+                        <input type="radio" id="q7_4" name="q7" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q7_4">4. 타 지역 대비 우리 지역의 기업/기관과 거래를 많이 하는 편이다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">8</div>
+                    <div class="question-text">사업이익의 사회적환원에 관한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q8', '1')">
+                        <input type="radio" id="q8_1" name="q8" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q8_1">1. 사회적기업은 사업이익의 2/3 이상을 사회적 목적으로 환원하는 것에 대해 모른다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q8', '2')">
+                        <input type="radio" id="q8_2" name="q8" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q8_2">2. 사업이익의 2/3 이상을 사회적 목적으로 환원하는 것에 동의하지 않는다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q8', '3')">
+                        <input type="radio" id="q8_3" name="q8" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q8_3">3. 사업이익의 2/3 이상을 사회적 목적으로 환원하는 것에 동의하며 실행하고 있지만 아직 2/3이 되지 않는다.</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q8', '4')">
+                        <input type="radio" id="q8_4" name="q8" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q8_4">4. 사업이익의 2/3 이상을 사회적 목적으로 환원하고 있다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">9</div>
+                    <div class="question-text">기업의 사회서비스 제공에 대한 질문입니다 (봉사활동 제외)</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q9', '1')">
+                        <input type="radio" id="q9_1" name="q9" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q9_1">1. 지역사회 혹은 취약계층를 위해 사회서비스 제공을 하기엔 아직 여력이 없거나 자사의 사업특성상 할 수 있는 일이 없다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q9', '2')">
+                        <input type="radio" id="q9_2" name="q9" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q9_2">2. 지역사회 혹은 취약계층를 위해 사회서비스 제공 활동을 계획하고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q9', '3')">
+                        <input type="radio" id="q9_3" name="q9" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q9_3">3. 지역사회 혹은 취약계층를 위해 사회서비스 제공 활동을 비정기적으로 수행하고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q9', '4')">
+                        <input type="radio" id="q9_4" name="q9" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q9_4">4. 지역사회 혹은 취약계층를 위해 사회서비스 제공 활동을 정기적으로 수행하고 있다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">10</div>
+                    <div class="question-text">기업의 주요의사결정기구에 대한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q10', '1')">
+                        <input type="radio" id="q10_1" name="q10" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q10_1">1. 주요의사결정기구로 이사회 또는 운영위원회(사회적협동조합,비영리 등)가 아직 구성되어있지 않고 계획(진행)중이다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q10', '2')">
+                        <input type="radio" id="q10_2" name="q10" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q10_2">2. 주요의사결정기구로 이사회 또는 운영위원회(사회적협동조합,비영리 등)가 구성되어있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q10', '3')">
+                        <input type="radio" id="q10_3" name="q10" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q10_3">3. 주요의사결정기구를 연 1회 비정기적으로 운영하였다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q10', '4')">
+                        <input type="radio" id="q10_4" name="q10" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q10_4">4. 주요의사결정기구를 연 2회 이상 운영하며 사외이사나 근로자대표가 참여한다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q10', '5')">
+                        <input type="radio" id="q10_5" name="q10" value="5" onchange="updateProgress()">
+                        <label class="option-label" for="q10_5">5. 주요의사결정기구에 연 2회 이상 운영하며 사외이사와 근로자대표가 참여하고 근로자에게 회의결과를 공유한다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">11</div>
+                    <div class="question-text">고용계획에 관한 질문입니다 (※유급근로자란 4대보험 가입 기준 고용인)</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q11', '1')">
+                        <input type="radio" id="q11_1" name="q11" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q11_1">1. 현재 유급근로자가 없으며, 향후 6개월 내 고용 계획이 없다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q11', '2')">
+                        <input type="radio" id="q11_2" name="q11" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q11_2">2. 현재 유급근로자가 없으나, 향후 6개월 내 고용 계획이 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q11', '3')">
+                        <input type="radio" id="q11_3" name="q11" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q11_3">3. 최근 6개월 간 유급근로자가 1명 이상 있으며, 향후 6개월 내 고용 계획이 없다 (예비 충족 수준)</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q11', '4')">
+                        <input type="radio" id="q11_4" name="q11" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q11_4">4. 최근 6개월 간 유급근로자가 1명 이상 있으며, 향후 6개월 내 고용 계획이 있다 (인증 충족 수준)</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q11', '5')">
+                        <input type="radio" id="q11_5" name="q11" value="5" onchange="updateProgress()">
+                        <label class="option-label" for="q11_5">5. 최근 6개월 간 유급근로자가 3명 이상 있으나, 6개월 평균3명 미만이다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q11', '6')">
+                        <input type="radio" id="q11_6" name="q11" value="6" onchange="updateProgress()">
+                        <label class="option-label" for="q11_6">6. 최근 6개월 간 유급근로자가 3명 이상 있으며, 6개월 평균 3명 이상이다 (인증,일자리제공형 충족 수준)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">12</div>
+                    <div class="question-text">법정의무교육에 관한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q12', '1')">
+                        <input type="radio" id="q12_1" name="q12" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q12_1">1. 법정의무교육에 대해 잘 모른다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q12', '2')">
+                        <input type="radio" id="q12_2" name="q12" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q12_2">2. 법정의무교육에 대해 알고 있으나 실시하지 못하고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q12', '3')">
+                        <input type="radio" id="q12_3" name="q12" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q12_3">3. 법정의무교육에 대해 알고 있으며 일부 실시하고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q12', '4')">
+                        <input type="radio" id="q12_4" name="q12" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q12_4">4. 법정의무교육에 대해 알고 있으며 전부 실시하고 있다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">13</div>
+                    <div class="question-text">대표자의 교육에 관한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q13', '1')">
+                        <input type="radio" id="q13_1" name="q13" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q13_1">1. 사업준비로 다른 교육에 참여하지 않고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q13', '2')">
+                        <input type="radio" id="q13_2" name="q13" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q13_2">2. 대표자를 위한 사회적경제 관련 기본교육을 들었다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q13', '3')">
+                        <input type="radio" id="q13_3" name="q13" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q13_3">3. 대표자를 위한 사회적경제와 업무(직무)에 관련된 교육 외에도 소셜캠퍼스에서 지원하는 인사, 마케팅, 회계 등 다양한 교육을 듣고있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q13', '4')">
+                        <input type="radio" id="q13_4" name="q13" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q13_4">4. 3번 항목외에 사업에 필요한 외부의 다양한 교육을 찾아서 듣고 있다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">14</div>
+                    <div class="question-text">비즈니스모델에 관한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q14', '1')">
+                        <input type="radio" id="q14_1" name="q14" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q14_1">1. 주력 사업이 아직 정해지지 않았다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q14', '2')">
+                        <input type="radio" id="q14_2" name="q14" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q14_2">2. 주력 사업 관련, 제품/서비스가 개발 단계이다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q14', '3')">
+                        <input type="radio" id="q14_3" name="q14" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q14_3">3. 주력 사업 관련 제품/서비스를 생산하는데 필요한 원재료와 공급업체를 확보하였다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q14', '4')">
+                        <input type="radio" id="q14_4" name="q14" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q14_4">4. 주력 사업 관련, 제품/서비스를 생산하는 공정이 확립되었다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q14', '5')">
+                        <input type="radio" id="q14_5" name="q14" value="5" onchange="updateProgress()">
+                        <label class="option-label" for="q14_5">5. 주력 사업 관련, 제품/서비스의 유통경로가 확보되었다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q14', '6')">
+                        <input type="radio" id="q14_6" name="q14" value="6" onchange="updateProgress()">
+                        <label class="option-label" for="q14_6">6. 주력 사업 관련, 제품/서비스의 수익비용구조(예, 손익분기점)을 확인하였다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">15</div>
+                    <div class="question-text">정부,지자체의 지원사업에 관한 질문입니다</div>
+                </div>
+                <div class="options-container">
+                    <div class="option-item" onclick="selectOption(this, 'q15', '1')">
+                        <input type="radio" id="q15_1" name="q15" value="1" onchange="updateProgress()">
+                        <label class="option-label" for="q15_1">1. 지원사업을 받아본 적이 없다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q15', '2')">
+                        <input type="radio" id="q15_2" name="q15" value="2" onchange="updateProgress()">
+                        <label class="option-label" for="q15_2">2. 지원사업에 대해 알아보고 준비하고 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q15', '3')">
+                        <input type="radio" id="q15_3" name="q15" value="3" onchange="updateProgress()">
+                        <label class="option-label" for="q15_3">3. 지원사업을 받아 사업을 진행해 본 사례가 있다</label>
+                    </div>
+                    <div class="option-item" onclick="selectOption(this, 'q15', '4')">
+                        <input type="radio" id="q15_4" name="q15" value="4" onchange="updateProgress()">
+                        <label class="option-label" for="q15_4">4. 지원사업을 2회 이상 받아 사업을 진행하고 있다</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">16</div>
+                    <div class="question-text">기업의 핵심 역량을 높이기 위해 새로운 시도를 하고 있다</div>
+                </div>
+                <div class="options-container">
+                    <div class="scale-options">
+                        <div class="scale-option">
+                            <input type="radio" id="q16_1" name="q16" value="1" onchange="updateProgress()">
+                            <label for="q16_1">1<br>전혀 그렇지<br>않다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q16_2" name="q16" value="2" onchange="updateProgress()">
+                            <label for="q16_2">2<br>그렇지<br>않다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q16_3" name="q16" value="3" onchange="updateProgress()">
+                            <label for="q16_3">3<br>보통이다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q16_4" name="q16" value="4" onchange="updateProgress()">
+                            <label for="q16_4">4<br>그렇다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q16_5" name="q16" value="5" onchange="updateProgress()">
+                            <label for="q16_5">5<br>매우<br>그렇다</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">17</div>
+                    <div class="question-text">목표 시장에 주요 경쟁 아이템을 파악하고 경쟁력을 분석하고 있다</div>
+                </div>
+                <div class="options-container">
+                    <div class="scale-options">
+                        <div class="scale-option">
+                            <input type="radio" id="q17_1" name="q17" value="1" onchange="updateProgress()">
+                            <label for="q17_1">1<br>전혀 그렇지<br>않다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q17_2" name="q17" value="2" onchange="updateProgress()">
+                            <label for="q17_2">2<br>그렇지<br>않다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q17_3" name="q17" value="3" onchange="updateProgress()">
+                            <label for="q17_3">3<br>보통이다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q17_4" name="q17" value="4" onchange="updateProgress()">
+                            <label for="q17_4">4<br>그렇다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q17_5" name="q17" value="5" onchange="updateProgress()">
+                            <label for="q17_5">5<br>매우<br>그렇다</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">18</div>
+                    <div class="question-text">시장흐름이나 대외환경에 대해 정기적으로 점검을하고있다</div>
+                </div>
+                <div class="options-container">
+                    <div class="scale-options">
+                        <div class="scale-option">
+                            <input type="radio" id="q18_1" name="q18" value="1" onchange="updateProgress()">
+                            <label for="q18_1">1<br>전혀 그렇지<br>않다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q18_2" name="q18" value="2" onchange="updateProgress()">
+                            <label for="q18_2">2<br>그렇지<br>않다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q18_3" name="q18" value="3" onchange="updateProgress()">
+                            <label for="q18_3">3<br>보통이다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q18_4" name="q18" value="4" onchange="updateProgress()">
+                            <label for="q18_4">4<br>그렇다</label>
+                        </div>
+                        <div class="scale-option">
+                            <input type="radio" id="q18_5" name="q18" value="5" onchange="updateProgress()">
+                            <label for="q18_5">5<br>매우<br>그렇다</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn" id="submitBtn" onclick="submitSurvey()">설문 제출 및 보고서 생성</button>
+            </div>
+        </div>
+
+        <!-- 보고서 섹션 -->
+        <div id="reportSection" class="hidden">
+            <div class="report-page" id="reportContainer"></div>
+            <div class="btn-container" style="background: white; padding: 30px;">
+                <button class="btn" onclick="window.print()" style="margin-right: 10px;">📄 인쇄하기</button>
+                <button class="btn" onclick="downloadReport()">💾 다운로드</button>
+                <button class="btn" onclick="resetSurvey()" style="margin-left: 10px;">🔄 새로 시작</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('=== Light-SVI Script Loading - Version 2.0 ===');
+        let radarChart = null;
+
+        // 자동 설정 함수
+        function setDefaults() {
+            console.log('=== setDefaults 함수 시작 ===');
+
+            // 오늘 날짜 설정
+            const dateInput = document.getElementById('surveyDate');
+            if (dateInput) {
+                dateInput.valueAsDate = new Date();
+                console.log('Date set');
+            }
+
+            // 기업명 설정
+            const companyInput = document.getElementById('companyName');
+            if (companyInput) {
+                companyInput.value = '협동조합소셜랩';
+                console.log('Company name set');
+            }
+
+            // 작성자 설정
+            const authorInput = document.getElementById('authorName');
+            if (authorInput) {
+                authorInput.value = '황유덕';
+                console.log('Author name set');
+            }
+
+            // 기본 정보 자동 선택 (있다)
+            const expYes = document.getElementById('exp_yes');
+            if (expYes) {
+                expYes.checked = true;
+                console.log('Exp yes checked');
+            }
+
+            const industryYes = document.getElementById('industry_yes');
+            if (industryYes) {
+                industryYes.checked = true;
+                console.log('Industry yes checked');
+            }
+
+            // Q1-Q15 자동 선택 (각 질문의 3번째 옵션 선택)
+            for (let i = 1; i <= 15; i++) {
+                if (i === 4) {
+                    // Q4는 복수선택이므로 2, 3번 선택
+                    const q4_2 = document.getElementById('q4_2');
+                    const q4_3 = document.getElementById('q4_3');
+                    if (q4_2 && q4_3) {
+                        q4_2.checked = true;
+                        q4_3.checked = true;
+                        q4_2.parentElement.classList.add('selected');
+                        q4_3.parentElement.classList.add('selected');
+                    }
+                } else {
+                    // 다른 질문들은 3번째 옵션 선택
+                    const radio = document.getElementById(`q${i}_3`);
+                    if (radio) {
+                        radio.checked = true;
+                        radio.parentElement.classList.add('selected');
+                    }
+                }
+            }
+
+            // Q16-Q18 자동 선택 (척도 3 선택)
+            for (let i = 16; i <= 18; i++) {
+                const radio = document.getElementById(`q${i}_3`);
+                if (radio) {
+                    radio.checked = true;
+                }
+            }
+
+            // 진행도 업데이트
+            updateProgress();
+            console.log('=== setDefaults 완료 ===');
+        }
+
+        // 페이지 로드 시 실행
+        console.log('=== 이벤트 리스너 등록 중 ===');
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('=== DOMContentLoaded 이벤트 발생 ===');
+            setDefaults();
+        });
+        window.addEventListener('load', function() {
+            console.log('=== Load 이벤트 발생 ===');
+            setTimeout(function() {
+                console.log('=== Timeout 실행 ===');
+                setDefaults();
+            }, 100);
+        });
+
+        function selectOption(element, questionName, value) {
+            const radio = document.getElementById(questionName + '_' + value);
+            radio.checked = true;
+            const allOptions = element.parentElement.querySelectorAll('.option-item');
+            allOptions.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            updateProgress();
+        }
+
+        function toggleCheckbox(element, checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            checkbox.checked = !checkbox.checked;
+            if (checkbox.checked) {
+                element.classList.add('selected');
+            } else {
+                element.classList.remove('selected');
+            }
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const totalQuestions = 20;
+            let answeredQuestions = 0;
+
+            if (document.querySelector('input[name="businessExp"]:checked')) answeredQuestions++;
+            if (document.querySelector('input[name="industryExp"]:checked')) answeredQuestions++;
+
+            for (let i = 1; i <= 15; i++) {
+                if (i === 4) {
+                    const checkboxes = document.querySelectorAll(`input[name="q4"]:checked`);
+                    if (checkboxes.length > 0) answeredQuestions++;
+                } else {
+                    if (document.querySelector(`input[name="q${i}"]:checked`)) answeredQuestions++;
+                }
+            }
+
+            for (let i = 16; i <= 18; i++) {
+                if (document.querySelector(`input[name="q${i}"]:checked`)) answeredQuestions++;
+            }
+
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('submitBtn').disabled = answeredQuestions < totalQuestions;
+        }
+
+        function submitSurvey() {
+            console.log('=== submitSurvey 함수 호출됨 ===');
+
+            const surveyDate = document.getElementById('surveyDate').value;
+            const companyName = document.getElementById('companyName').value;
+            const authorName = document.getElementById('authorName').value;
+
+            console.log('입력값:', { surveyDate, companyName, authorName });
+
+            if (!companyName || !authorName) {
+                alert('기업명과 작성자명을 입력해주세요.');
+                return;
+            }
+
+            console.log('입력값 검증 통과');
+
+            const responses = {
+                date: surveyDate,
+                company: companyName,
+                author: authorName,
+                businessExp: document.querySelector('input[name="businessExp"]:checked')?.value,
+                industryExp: document.querySelector('input[name="industryExp"]:checked')?.value,
+                answers: {}
+            };
+
+            for (let i = 1; i <= 15; i++) {
+                if (i === 4) {
+                    const checkboxes = document.querySelectorAll(`input[name="q4"]:checked`);
+                    responses.answers[`q${i}`] = Array.from(checkboxes).map(cb => parseInt(cb.value));
+                } else {
+                    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                    responses.answers[`q${i}`] = selected ? parseInt(selected.value) : null;
+                }
+            }
+
+            for (let i = 16; i <= 18; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                responses.answers[`q${i}`] = selected ? parseInt(selected.value) : null;
+            }
+
+            generateReport(responses);
+            document.getElementById('surveySection').classList.add('hidden');
+            document.getElementById('reportSection').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function calculateScores(responses) {
+            console.log('=== calculateScores 시작 ===');
+            console.log('응답 데이터:', responses.answers);
+
+            const scores = {
+                categories: {},
+                details: {}
+            };
+
+            // 상세 점수 계산
+            scores.details.socialMission = responses.answers.q1 || 0;
+            scores.details.businessPlan = responses.answers.q2 || 0;
+            scores.details.workSafety = responses.answers.q3 || 0;
+            scores.details.socialValue = Array.isArray(responses.answers.q4) ? responses.answers.q4.length : 0;
+            scores.details.socialCooperation = responses.answers.q5 || 0;
+            scores.details.socialTrade = responses.answers.q6 || 0;
+            scores.details.localNetwork = responses.answers.q7 || 0;
+            scores.details.socialReturn = responses.answers.q8 || 0;
+            scores.details.socialService = responses.answers.q9 || 0;
+            scores.details.governance = responses.answers.q10 || 0;
+            scores.details.employment = responses.answers.q11 || 0;
+            scores.details.legalEducation = responses.answers.q12 || 0;
+            scores.details.leaderEducation = responses.answers.q13 || 0;
+            scores.details.businessModel = responses.answers.q14 || 0;
+            scores.details.govSupport = responses.answers.q15 || 0;
+            scores.details.innovation = responses.answers.q16 || 0;
+            scores.details.marketAnalysis = responses.answers.q17 || 0;
+            scores.details.marketMonitoring = responses.answers.q18 || 0;
+
+            // 카테고리 점수 계산 (5점 만점으로 환산) - 점수체계.png 기준
+            // 경영 영역 (11개): 순수(과거사업경험, 해당업계종사경험, Q2, Q13, Q14, Q17, Q18) + 교차(Q16, Q15, Q1, Q6)
+            const managementScores = [
+                responses.answers.q1 / 4 * 5,      // Q1 (사업목적) - 교차
+                responses.answers.q2 / 4 * 5,      // Q2 - 순수
+                responses.answers.q6 / 4 * 5,      // Q6 (거래처) - 교차
+                responses.answers.q13 / 4 * 5,    // Q13 - 순수
+                responses.answers.q14 / 6 * 5,    // Q14 - 순수
+                responses.answers.q15 / 4 * 5,    // Q15 (수익성) - 교차
+                responses.answers.q16 / 5 * 5,    // Q16 (자금) - 교차
+                responses.answers.q17 / 5 * 5,    // Q17 - 순수
+                responses.answers.q18 / 5 * 5     // Q18 - 순수
+            ];
+            // 과거사업경험, 해당업계종사경험은 설문에 없으므로 9개 항목으로 계산
+            scores.categories.management = (managementScores.reduce((a, b) => a + b, 0) / managementScores.length).toFixed(2);
+
+            // 재무 영역 (3개): 교차(Q15-손익, Q16-자금원, Q8-이익환원)
+            const financeScores = [
+                responses.answers.q8 / 4 * 5,     // Q8 (이익환원) - 교차
+                responses.answers.q15 / 4 * 5,    // Q15 (손익) - 교차
+                responses.answers.q16 / 5 * 5     // Q16 (자금원) - 교차
+            ];
+            scores.categories.finance = (financeScores.reduce((a, b) => a + b, 0) / financeScores.length).toFixed(2);
+
+            // 조직 영역 (4개): 순수(Q12-법정교육) + 교차(Q3-안전, Q10-의사결정, Q11-고용)
+            const orgScores = [
+                responses.answers.q3 / 4 * 5,     // Q3 (안전) - 교차
+                responses.answers.q10 / 5 * 5,    // Q10 (의사결정) - 교차
+                responses.answers.q11 / 6 * 5,    // Q11 (고용) - 교차
+                responses.answers.q12 / 4 * 5     // Q12 (법정교육) - 순수
+            ];
+            scores.categories.organization = (orgScores.reduce((a, b) => a + b, 0) / orgScores.length).toFixed(2);
+
+            // SVI 영역 (10개): 순수(Q4, Q5, Q7, Q9) + 교차(Q1-미션, Q6-협력, Q8-환원, Q3-인권, Q10-민주성, Q11-일자리)
+            const sviScores = [
+                responses.answers.q1 / 4 * 5,     // Q1 (미션) - 교차
+                responses.answers.q3 / 4 * 5,     // Q3 (인권) - 교차
+                (Array.isArray(responses.answers.q4) ? responses.answers.q4.length : 0) / 4 * 5,  // Q4 - 순수
+                responses.answers.q5 / 4 * 5,     // Q5 - 순수
+                responses.answers.q6 / 4 * 5,     // Q6 (협력) - 교차
+                responses.answers.q7 / 4 * 5,     // Q7 - 순수
+                responses.answers.q8 / 4 * 5,     // Q8 (환원) - 교차
+                responses.answers.q9 / 4 * 5,     // Q9 - 순수
+                responses.answers.q10 / 5 * 5,    // Q10 (민주성) - 교차
+                responses.answers.q11 / 6 * 5     // Q11 (일자리) - 교차
+            ];
+            scores.categories.svi = (sviScores.reduce((a, b) => a + b, 0) / sviScores.length).toFixed(2);
+
+            console.log('계산된 카테고리 점수:', scores.categories);
+            console.log('=== calculateScores 완료 ===');
+
+            return scores;
+        }
+
+        function generateReport(responses) {
+            const scores = calculateScores(responses);
+
+            // 가장 취약한 영역 찾기
+            const categories = [
+                { name: '경영', value: parseFloat(scores.categories.management), key: 'management' },
+                { name: '재무', value: parseFloat(scores.categories.finance), key: 'finance' },
+                { name: '조직', value: parseFloat(scores.categories.organization), key: 'organization' },
+                { name: 'SVI', value: parseFloat(scores.categories.svi), key: 'svi' }
+            ];
+
+            categories.sort((a, b) => a.value - b.value);
+            const weakestCategory = categories[0].name;
+
+            const reportHTML = `
+                <div class="report-header-bar">입주기업 기초진단 결과보고서</div>
+
+                <table class="report-info-table">
+                    <tr>
+                        <td class="label-cell">기업명</td>
+                        <td>${responses.company}</td>
+                        <td class="label-cell">자가진단일</td>
+                        <td>${responses.date}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">담당</td>
+                        <td>${responses.author}</td>
+                        <td class="label-cell">진단일</td>
+                        <td><input type="date" id="interviewDate" class="interview-date-input" placeholder="면담일 기입"></td>
+                    </tr>
+                </table>
+
+                <div class="report-summary-box">
+                    <div class="report-summary-text">
+                        <strong>${responses.company} 기업을 기초진단한 결과 가장 취약한 영역은 ${weakestCategory}입니다</strong>
+                    </div>
+                    <div class="report-summary-text" style="font-size: 0.95em;">
+                        세부적으로 살펴보면 상대적으로 ${getWeakestDetail(scores.details)} 요인이 낮게 나타났으며, 이 영역에 대한 집중적인 개선과 보완이 필요한 상황입니다.
+                        ${weakestCategory} 영역의 강화를 위해서는 체계적인 계획 수립과 실행 전략이 요구되며, 단계적 목표 설정을 통해 점진적으로 역량을 향상시켜 나가야 합니다.
+                        반면, ${getStrongestDetail(scores.details)} 요인은 긍정적으로 높게 나타났으며, 이는 귀사의 강점 영역으로 지속적으로 유지·발전시켜 나갈 필요가 있습니다.
+                        이러한 강점을 기반으로 취약 영역을 보완하는 전략을 수립한다면 보다 균형있는 조직 발전을 이룰 수 있을 것입니다.
+                    </div>
+                    <div class="report-summary-text" style="font-size: 0.95em;">
+                        또한 사업경험은 ${responses.businessExp === '있다' ? '있는 것으로 확인되어, 기존의 사업 운영 노하우를 활용할 수 있는 기반이 마련되어 있습니다' : '없는 것으로 확인되어, 사업 운영에 대한 기초적인 이해와 학습이 필요할 것으로 보입니다'}.
+                        동종업종 경험은 ${responses.industryExp === '있다' ? '있어, 업계에 대한 전문성과 네트워크를 보유하고 있어 사업 추진에 유리한 조건을 갖추고 있습니다' : '없어, 해당 업계에 대한 시장 조사와 전문성 확보를 위한 노력이 선행되어야 할 것으로 판단됩니다'}.
+                        이러한 경험적 배경을 고려하여 맞춤형 성장 전략을 수립하고, 필요한 역량을 보완해 나간다면 지속가능한 사회적기업으로 성장할 수 있을 것입니다.
+                    </div>
+                </div>
+
+                <div class="report-main-content">
+                    <!-- 왼쪽 섹션: 레이더 차트 + 상세 설명 -->
+                    <div class="report-left-section">
+                        <div class="radar-chart-container">
+                            <div class="radar-chart-title">영역진단결과</div>
+                            <div class="chart-wrapper">
+                                <div class="chart-background">
+                                    <div class="chart-quadrant management">
+                                        <div class="quadrant-label management">경영</div>
+                                    </div>
+                                    <div class="chart-quadrant finance">
+                                        <div class="quadrant-label finance">재무</div>
+                                    </div>
+                                    <div class="chart-quadrant organization">
+                                        <div class="quadrant-label organization">조직</div>
+                                    </div>
+                                    <div class="chart-quadrant svi">
+                                        <div class="quadrant-label svi">SVI</div>
+                                    </div>
+                                </div>
+                                <div class="chart-crosshair"></div>
+                                <canvas id="radarChart"
+                                    data-management="${scores.categories.management}"
+                                    data-finance="${scores.categories.finance}"
+                                    data-organization="${scores.categories.organization}"
+                                    data-svi="${scores.categories.svi}"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="detail-boxes">
+                            ${generateDetailBoxes(scores.categories)}
+                        </div>
+                    </div>
+
+                    <!-- 오른쪽 섹션: 진단 박스 + 가로 바 차트 -->
+                    <div class="report-right-section">
+                        <div class="diagnosis-box">
+                            <div class="diagnosis-header">
+                                <span>진단결과</span>
+                            </div>
+                            <div class="diagnosis-content">
+                                ${generateDiagnosisText(categories[0])}
+                            </div>
+                        </div>
+
+                        <div class="bar-chart-section">
+                            <div class="bar-chart-header">상세진단결과</div>
+                            <div class="bar-chart-content">
+                                ${generateBarChart(scores.details)}
+                                <div class="status-badges">
+                                    <div class="status-badge blue">우수</div>
+                                    <div class="status-badge yellow">양호</div>
+                                    <div class="status-badge red">위험</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="opinion-section">
+                    <div class="opinion-box">
+                        <div class="opinion-header">＜＜기업 의견＞＞</div>
+                        <div class="opinion-content">
+                            <span class="opinion-label">기업은 진단 결과를 확인하여 의견이 있을시 내용 기재</span>
+                            <textarea class="opinion-textarea" id="companyOpinion" placeholder="기업의견을 입력하세요..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="opinion-box">
+                        <div class="opinion-header">＜＜종합 의견＞＞</div>
+                        <div class="opinion-content">
+                            <span class="opinion-label">기업의 진단 결과를 확인하여 면담 하여 담당자의 의견 서술</span>
+                            <textarea class="opinion-textarea" id="comprehensiveOpinion" placeholder="종합의견을 입력하세요..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-footer">
+                    한국사회적기업진흥원 소셜캠퍼스온
+                </div>
+            `;
+
+            document.getElementById('reportContainer').innerHTML = reportHTML;
+
+            // 레이더 차트 생성
+            setTimeout(() => {
+                createRadarChart(scores.categories);
+            }, 100);
+        }
+
+        function createRadarChart(categories) {
+            const ctx = document.getElementById('radarChart');
+            if (!ctx) return;
+
+            if (radarChart) {
+                radarChart.destroy();
+            }
+
+            const scores = [
+                parseFloat(categories.management),
+                parseFloat(categories.finance),
+                parseFloat(categories.svi),
+                parseFloat(categories.organization)
+            ];
+
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: [scores[0].toFixed(2), scores[1].toFixed(2), scores[2].toFixed(2), scores[3].toFixed(2)],
+                    datasets: [{
+                        label: '진단 결과',
+                        data: scores,
+                        fill: false,
+                        backgroundColor: 'transparent',
+                        borderColor: '#333333',
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#333333',
+                        pointHoverBackgroundColor: '#ffffff',
+                        pointHoverBorderColor: '#333333',
+                        borderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: false,
+                            min: 1,
+                            max: 5,
+                            startAngle: 45,
+                            ticks: {
+                                stepSize: 1,
+                                display: false
+                            },
+                            grid: {
+                                display: false
+                            },
+                            angleLines: {
+                                display: false
+                            },
+                            pointLabels: {
+                                display: true,
+                                font: {
+                                    size: 18,
+                                    weight: 'bold'
+                                },
+                                color: '#333',
+                                padding: -10
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.r.toFixed(2) + '점';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getWeakestDetail(details) {
+            const items = Object.entries(details).map(([key, value]) => ({ key, value }));
+            items.sort((a, b) => a.value - b.value);
+            const weakest = items[0].key;
+            const nameMap = {
+                'localNetwork': '지역협력',
+                'socialValue': '기업의 사회적가치',
+                'socialReturn': '사회환원',
+                'employment': '고용',
+                'businessModel': '비즈니스모델'
+            };
+            return nameMap[weakest] || weakest;
+        }
+
+        function getStrongestDetail(details) {
+            const items = Object.entries(details).map(([key, value]) => ({ key, value }));
+            items.sort((a, b) => b.value - a.value);
+            const strongest = items[0].key;
+            const nameMap = {
+                'businessPlan': '사업계획수립',
+                'socialMission': '소셜미션',
+                'governance': '민주적 의사결정',
+                'govSupport': '성장잠재력',
+                'innovation': '사업아이템'
+            };
+            return nameMap[strongest] || strongest;
+        }
+
+        function generateDetailBoxes(categories) {
+            const boxes = [
+                {
+                    title: '[소셜미션· 사업계획수립]',
+                    content: '사회적문제 해결을 위한 계획과 목표달성을 위한 세부 전략을 마련하고 사업성과를 정기적으로 평가하며 피드백을 통해 계획을 보완하여야함'
+                },
+                {
+                    title: '[기업의 사회적가치·사회적경제기업협력·지역협력]',
+                    content: '업무재해 위험 요소를 파악하여 안전 교육을 실시하고 상품 가격 경쟁력을 유지하고 품질보장 방법을 모색해야함. 또한, 사회적경제기업과 협력사업을 확대하며 지속가능한 관계를 구축하고 지역기업과의 거래를 우선하여 지역경제 활성화에 기여해야함'
+                },
+                {
+                    title: '[사회환원]',
+                    content: '사회적환원 비율을 높이기위한 계획 수립과 실행을하고 정기적 사회서비스 제공 활동으로 지속적 지원체계를 구축해야함'
+                },
+                {
+                    title: '[민주적 의사결정·고용·교육]',
+                    content: '근로자들이 회의결과에 대해 의견을 제시할 수 있는 기회를 제공하고 고용 계획 수립과 인력확보 방안 모색이 필요함. 그리고 이슈현황을 문서화하여 체계적으로 관리하고 대표자가 교육내용을 기업에 적용할 수 있도록함'
+                },
+                {
+                    title: '[비즈니스모델]',
+                    content: '제품/서비스 프로토타입 제작과 테스트를 실시하며 개선하고 지원사업 종료 후의 후속사업을 준비해야함'
+                },
+                {
+                    title: '[성장잠재력·사업아이템·시장분석]',
+                    content: '혁신적인 프로젝트를 통해 새로운 시장 진입을 적극적으로 시도하고 정기적으로 경쟁사 모니터링을 실시하여 시장 변화에 신속하게 대응하고 점검, 분석결과를 통해 대응방안을 마련한다'
+                }
+            ];
+
+            return boxes.map(box => `
+                <div class="detail-box">
+                    <div class="detail-box-header">${box.title}</div>
+                    <div class="detail-box-content">${box.content}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateDiagnosisText(weakestCategory) {
+            const texts = {
+                '조직미션': '조직미션 영역의 강화가 필요합니다. 사회적 가치 창출을 위한 명확한 소셜미션 수립이 우선되어야 하며, 이를 달성하기 위한 구체적이고 실행 가능한 사업계획을 마련해야 합니다. 사회적 문제 해결을 위한 목표를 설정하고, 단계별 실행 전략을 수립하여 정기적으로 성과를 평가하고 피드백을 반영하는 체계를 구축해야 합니다. 또한 이해관계자들과의 소통을 통해 미션에 대한 공감대를 형성하고, 조직 구성원 모두가 공유하는 가치로 내재화하는 것이 중요합니다.',
+
+                '사업활동': '사업활동 영역의 강화가 필요합니다. 사회적 가치를 실현하는 구체적인 사업 활동을 확대해야 합니다. 근로자의 보건과 안전을 최우선으로 하는 작업 환경을 조성하고, 사회적경제기업 간 협력 네트워크를 구축하여 상호 성장할 수 있는 기반을 마련해야 합니다. 지역사회와의 긴밀한 협력관계를 형성하고, 사업 이익의 사회환원 계획을 수립하여 실천해야 합니다. 또한 취약계층을 위한 사회서비스 제공을 확대하고, 지속가능한 사회적 가치 창출 활동을 강화해 나가야 합니다.',
+
+                '조직운영': '조직운영 영역의 강화가 필요합니다. 민주적 의사결정 구조를 확립하여 구성원들의 참여와 의견 수렴이 실질적으로 이루어지도록 해야 합니다. 주요 의사결정 과정에서 투명성을 확보하고, 정기적인 회의를 통해 조직 운영 현황을 공유해야 합니다. 체계적인 고용 계획을 수립하여 일자리 창출과 고용 안정을 도모하고, 법정의무교육을 충실히 이행하며, 대표자 및 구성원의 역량 강화를 위한 교육 기회를 확대해야 합니다. 이를 통해 조직의 지속가능성과 내부 역량을 동시에 강화할 수 있습니다.',
+
+                '재정성과': '재정성과 영역의 강화가 필요합니다. 지속가능한 비즈니스모델을 개발하고 고도화하여 안정적인 수익 구조를 확립해야 합니다. 제품과 서비스의 프로토타입을 제작하고 테스트를 통해 지속적으로 개선하며, 시장에서의 경쟁력을 높여야 합니다. 정부 및 지자체 지원사업을 적극 활용하되, 지원 종료 후에도 자립할 수 있는 수익모델을 구축해야 합니다. 재무 관리 체계를 강화하고 다각화된 수익원을 확보하여 재정적 안정성을 높이는 것이 중요합니다.',
+
+                '기업혁신': '기업혁신 영역의 강화가 필요합니다. 핵심 역량을 강화하기 위한 혁신적인 시도를 지속적으로 추진해야 합니다. 시장 트렌드와 경쟁 환경을 정기적으로 분석하고, 고객의 니즈 변화를 면밀히 파악하여 이에 대응하는 전략을 수립해야 합니다. 경쟁 기업의 아이템을 분석하고 차별화된 가치를 제공할 수 있는 방안을 모색하며, 시장 흐름을 정기적으로 점검하여 선제적으로 대응해야 합니다. 혁신적인 제품과 서비스 개발을 통해 새로운 시장 기회를 창출하고, 지속적인 성장 동력을 확보하는 것이 중요합니다.'
+            };
+
+            return texts[weakestCategory.name] || `${weakestCategory.name} 영역의 강화가 필요합니다. 사회적 가치 창출을 위한 구체적 사업계획 수립과 실행방안 모색이 요구됩니다. 명확한 목표 설정과 성과 측정을 통해 지속적으로 개선해 나가야 합니다. 시장 조사 및 분석을 통해 고객의 요구와 사회적 문제를 파악하고, 이를 해결하기 위한 혁신적인 사업 모델을 개발해야 합니다. 또한, 사업 성과를 정기적으로 평가하여 필요한 조정을 통해 목표 달성을 촉진하고, 이해관계자들과의 소통을 강화하여 지속가능한 성장 기반을 구축해야 합니다.`;
+        }
+
+        function generateBarChart(details) {
+            const items = [
+                { label: '소셜미션', value: details.socialMission, originalMax: 4 },
+                { label: '사업계획수립', value: details.businessPlan, originalMax: 4 },
+                { label: '기업의 사회적가치', value: details.socialValue, originalMax: 4 },
+                { label: '사회적경제기업 협력', value: details.socialCooperation, originalMax: 4 },
+                { label: '지역협력', value: details.localNetwork, originalMax: 4 },
+                { label: '사회환원계획', value: details.socialReturn, originalMax: 4 },
+                { label: '민주적 의사결정 구조', value: details.governance, originalMax: 5 },
+                { label: '고용계획', value: details.employment, originalMax: 6 },
+                { label: '내부역량향상', value: details.leaderEducation, originalMax: 4 },
+                { label: '비즈니스모델', value: details.businessModel, originalMax: 6 },
+                { label: '성장잠재력', value: details.govSupport, originalMax: 4 },
+                { label: '사업아이템', value: details.innovation, originalMax: 5 },
+                { label: '시장분석', value: details.marketAnalysis, originalMax: 5 }
+            ];
+
+            return items.map(item => {
+                // 5점 만점으로 환산
+                const normalizedValue = (item.value / item.originalMax) * 5;
+                const percentage = (normalizedValue / 5) * 100;
+
+                // 점수에 따라 색상 결정
+                let color;
+                if (normalizedValue >= 3.5) {
+                    color = 'blue';  // 우수 (3.5 이상)
+                } else if (normalizedValue >= 2) {
+                    color = 'yellow';  // 양호 (2 ~ 3.5 미만)
+                } else {
+                    color = 'red';  // 위험 (2 미만)
+                }
+
+                return `
+                    <div class="bar-item">
+                        <div class="bar-label">
+                            <span>${item.label}</span>
+                            <span>${normalizedValue.toFixed(2)}</span>
+                        </div>
+                        <div class="bar-wrapper">
+                            <div class="bar-fill ${color}" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function downloadReport() {
+            // 면담일 값과 의견 값을 가져오기
+            const interviewDate = document.getElementById('interviewDate')?.value || '';
+            const companyOpinion = document.getElementById('companyOpinion')?.value || '';
+            const comprehensiveOpinion = document.getElementById('comprehensiveOpinion')?.value || '';
+            let reportContent = document.getElementById('reportContainer').innerHTML;
+
+            // 면담일 입력 필드를 값으로 치환
+            if (interviewDate) {
+                reportContent = reportContent.replace(
+                    /<input[^>]*id="interviewDate"[^>]*>/,
+                    interviewDate
+                );
+            }
+
+            // 의견 textarea를 값으로 치환
+            if (companyOpinion) {
+                reportContent = reportContent.replace(
+                    /<textarea[^>]*id="companyOpinion"[^>]*>.*?<\/textarea>/s,
+                    `<div style="white-space: pre-wrap; padding: 10px;">${companyOpinion.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`
+                );
+            }
+            if (comprehensiveOpinion) {
+                reportContent = reportContent.replace(
+                    /<textarea[^>]*id="comprehensiveOpinion"[^>]*>.*?<\/textarea>/s,
+                    `<div style="white-space: pre-wrap; padding: 10px;">${comprehensiveOpinion.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`
+                );
+            }
+
+            const fullHTML = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light-SVI 진단 결과 보고서</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><` + `/script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            background: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .report-page {
+            background: white;
+            width: 210mm;
+            margin: 0 auto;
+            padding: 0;
+        }
+        .report-header-bar {
+            background: #4a5568;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .report-info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .report-info-table td {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+        }
+        .report-info-table .label-cell {
+            background: #6b7280;
+            color: white;
+            font-weight: bold;
+            width: 100px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .report-summary-box {
+            border: 3px solid #000;
+            padding: 20px;
+            margin: 20px;
+        }
+        .report-summary-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        .report-main-content {
+            display: grid;
+            grid-template-columns: 50% 50%;
+            gap: 20px;
+            padding: 20px;
+        }
+        .report-left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .radar-chart-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+        }
+        .radar-chart-title {
+            font-size: 1.3em;
+            color: #000;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 320px;
+            width: 320px;
+            margin: 0 auto;
+        }
+        .chart-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            z-index: 0;
+        }
+        .chart-quadrant {
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+        }
+        .chart-quadrant.management {
+            background-color: rgba(219, 234, 254, 0.35);
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+        .chart-quadrant.finance {
+            background-color: rgba(254, 243, 199, 0.35);
+            justify-content: flex-start;
+            align-items: flex-end;
+        }
+        .chart-quadrant.organization {
+            background-color: rgba(236, 252, 203, 0.35);
+            justify-content: flex-end;
+            align-items: flex-start;
+        }
+        .chart-quadrant.svi {
+            background-color: rgba(233, 213, 255, 0.35);
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+        .quadrant-label {
+            font-weight: bold;
+            font-size: 1.3em;
+            line-height: 1.3;
+        }
+        .quadrant-label.management { color: #1e40af; }
+        .quadrant-label.finance { color: #b45309; text-align: right; }
+        .quadrant-label.organization { color: #4d7c0f; }
+        .quadrant-label.svi { color: #6d28d9; text-align: right; }
+        .chart-crosshair {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .chart-crosshair::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .chart-crosshair::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .chart-wrapper canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .detail-boxes {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .detail-box {
+            border: 2px solid #000;
+            padding: 15px;
+            background: white;
+            page-break-inside: avoid;
+        }
+        .detail-box-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 12px;
+            margin: -15px -15px 12px -15px;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+        .detail-box-content {
+            font-size: 0.85em;
+            line-height: 1.6;
+            color: #333;
+        }
+        .report-right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .diagnosis-box {
+            border: 2px solid #1e3a8a;
+            background: white;
+            page-break-inside: avoid;
+        }
+        .diagnosis-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .diagnosis-content {
+            padding: 20px;
+            background: #eff6ff;
+            font-size: 0.9em;
+            line-height: 1.8;
+        }
+        .bar-chart-section {
+            background: white;
+            page-break-inside: avoid;
+        }
+        .bar-chart-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+        .bar-chart-content {
+            padding: 15px;
+        }
+        .bar-item {
+            margin-bottom: 12px;
+        }
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            margin-bottom: 4px;
+            color: #333;
+        }
+        .bar-wrapper {
+            width: 100%;
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        .bar-fill.blue {
+            background: #2563eb;
+        }
+        .bar-fill.red {
+            background: #dc2626;
+        }
+        .bar-fill.yellow {
+            background: #f59e0b;
+        }
+        .status-badges {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+        .status-badge {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .status-badge.blue {
+            background: #2563eb;
+        }
+        .status-badge.yellow {
+            background: #f59e0b;
+        }
+        .status-badge.red {
+            background: #dc2626;
+        }
+        .report-footer {
+            text-align: right;
+            padding: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .opinion-section {
+            margin: 20px;
+            page-break-inside: avoid;
+        }
+        .opinion-box {
+            margin-bottom: 20px;
+            border: 2px solid #1e3a8a;
+        }
+        .opinion-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 1em;
+        }
+        .opinion-content {
+            padding: 0;
+        }
+        .opinion-label {
+            display: block;
+            padding: 8px 15px;
+            background: #f3f4f6;
+            color: #374151;
+            font-size: 0.9em;
+            border-bottom: 1px solid #d1d5db;
+        }
+        @media print {
+            @page {
+                size: A4;
+                margin: 8mm;
+            }
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            .report-page {
+                width: 100%;
+                max-height: 281mm;
+                padding: 0;
+                margin: 0;
+            }
+            .report-header-bar {
+                padding: 5px 15px;
+                font-size: 1.1em;
+            }
+            .report-info-table td {
+                padding: 4px 8px;
+                font-size: 0.75em;
+            }
+            .report-summary-box {
+                padding: 8px 12px;
+                margin: 8px 12px;
+                border: 2px solid #000;
+            }
+            .report-summary-text {
+                font-size: 0.75em;
+                line-height: 1.4;
+                margin-bottom: 5px;
+            }
+            .report-main-content {
+                gap: 8px;
+                padding: 8px 12px;
+                page-break-inside: avoid;
+            }
+            .radar-chart-container {
+                padding: 8px;
+            }
+            .radar-chart-title {
+                font-size: 0.9em;
+                margin-bottom: 3px;
+            }
+            .chart-wrapper {
+                height: 150px;
+                width: 150px;
+                margin: 0 auto;
+            }
+            .chart-quadrant {
+                padding: 5px;
+            }
+            .quadrant-label {
+                font-size: 0.8em;
+            }
+            .score-label {
+                font-size: 0.65em;
+                padding: 1px 3px;
+            }
+            .detail-boxes {
+                gap: 5px;
+            }
+            .detail-box {
+                padding: 6px;
+                border: 1px solid #000;
+            }
+            .detail-box-header {
+                padding: 4px 6px;
+                margin: -6px -6px 6px -6px;
+                font-size: 0.65em;
+            }
+            .detail-box-content {
+                font-size: 0.6em;
+                line-height: 1.3;
+            }
+            .report-right-section {
+                gap: 6px;
+            }
+            .diagnosis-box {
+                border: 1px solid #1e3a8a;
+            }
+            .diagnosis-header {
+                padding: 5px 8px;
+                font-size: 0.75em;
+            }
+            .diagnosis-content {
+                padding: 8px;
+                font-size: 0.6em;
+                line-height: 1.4;
+            }
+            .bar-chart-header {
+                padding: 5px 8px;
+                font-size: 0.75em;
+            }
+            .bar-chart-content {
+                padding: 8px;
+            }
+            .bar-item {
+                margin-bottom: 4px;
+            }
+            .bar-label {
+                font-size: 0.6em;
+                margin-bottom: 1px;
+            }
+            .bar-wrapper {
+                height: 12px;
+            }
+            .bar-fill {
+                font-size: 0.55em;
+                padding-right: 4px;
+            }
+            .status-badges {
+                margin-top: 5px;
+                gap: 5px;
+            }
+            .status-badge {
+                width: 24px;
+                height: 24px;
+                font-size: 0.6em;
+            }
+            .report-footer {
+                padding: 8px 12px;
+                font-size: 0.65em;
+            }
+            .opinion-section {
+                margin: 8px 12px;
+                page-break-inside: avoid;
+            }
+            .opinion-box {
+                margin-bottom: 8px;
+                border: 1px solid #1e3a8a;
+            }
+            .opinion-header {
+                padding: 4px 8px;
+                font-size: 0.75em;
+            }
+            .opinion-label {
+                padding: 4px 8px;
+                font-size: 0.6em;
+            }
+            .opinion-content div {
+                padding: 6px 8px;
+                font-size: 0.65em;
+                line-height: 1.4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-page">
+        ${reportContent}
+    </div>
+    <` + `script>
+        // 차트 재생성
+        window.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('radarChart');
+            if (ctx) {
+                // 데이터 속성에서 점수 가져오기
+                const dataValues = [
+                    parseFloat(ctx.dataset.management),
+                    parseFloat(ctx.dataset.finance),
+                    parseFloat(ctx.dataset.svi),
+                    parseFloat(ctx.dataset.organization)
+                ];
+
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: [dataValues[0].toFixed(2), dataValues[1].toFixed(2), dataValues[2].toFixed(2), dataValues[3].toFixed(2)],
+                        datasets: [{
+                            label: '진단 결과',
+                            data: dataValues,
+                            fill: false,
+                            backgroundColor: 'transparent',
+                            borderColor: '#333333',
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#333333',
+                            pointHoverBackgroundColor: '#ffffff',
+                            pointHoverBorderColor: '#333333',
+                            borderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: false,
+                                min: 1,
+                                max: 5,
+                                startAngle: 45,
+                                ticks: {
+                                    stepSize: 1,
+                                    display: false
+                                },
+                                grid: {
+                                    display: false
+                                },
+                                angleLines: {
+                                    display: false
+                                },
+                                pointLabels: {
+                                    display: true,
+                                    font: {
+                                        size: 18,
+                                        weight: 'bold'
+                                    },
+                                    color: '#333',
+                                    padding: -10
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                enabled: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.r.toFixed(2) + '점';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    <` + `/script>
+</body>
+</html>`;
+
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Light-SVI_진단결과_${new Date().toISOString().split('T')[0]}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function resetSurvey() {
+            if (confirm('새로 시작하시겠습니까? 현재 응답 내용은 사라집니다.')) {
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVI Survey Web Service 기획서</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; background: #f0f0f0; color: #333; font-size: 13px; line-height: 1.6; }
+
+        .doc-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* 표지 */
+        .cover { background: white; padding: 80px 60px; margin-bottom: 30px; border: 1px solid #ddd; text-align: center; }
+        .cover h1 { font-size: 2.4em; color: #2d3748; margin-bottom: 20px; }
+        .cover .subtitle { font-size: 1.2em; color: #718096; margin-bottom: 40px; }
+        .cover .info-table { margin: 0 auto; border-collapse: collapse; }
+        .cover .info-table td { padding: 8px 20px; text-align: left; }
+        .cover .info-table .label { font-weight: bold; color: #4a5568; }
+
+        /* 목차 */
+        .toc { background: white; padding: 40px 60px; margin-bottom: 30px; border: 1px solid #ddd; }
+        .toc h2 { font-size: 1.4em; color: #2d3748; margin-bottom: 20px; border-bottom: 2px solid #4a5568; padding-bottom: 10px; }
+        .toc ul { list-style: none; }
+        .toc li { padding: 6px 0; border-bottom: 1px dotted #e2e8f0; }
+        .toc li a { text-decoration: none; color: #3182ce; }
+        .toc .depth-1 { font-weight: bold; font-size: 1.05em; }
+        .toc .depth-2 { padding-left: 24px; }
+
+        /* 화면별 섹션 */
+        .screen-section { background: white; margin-bottom: 30px; border: 1px solid #ddd; page-break-inside: avoid; }
+        .screen-header { background: #4a5568; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .screen-header h2 { font-size: 1.3em; }
+        .screen-header .screen-id { font-size: 0.9em; opacity: 0.8; }
+        .screen-header .screen-url { background: rgba(255,255,255,0.2); padding: 3px 12px; border-radius: 3px; font-size: 0.85em; font-family: monospace; }
+
+        /* 2단 레이아웃 */
+        .two-col { display: grid; grid-template-columns: 40% 60%; min-height: 400px; }
+        .col-left { padding: 25px; border-right: 2px solid #e2e8f0; background: #fafafa; }
+        .col-right { padding: 25px; }
+
+        /* 와이어프레임 */
+        .wireframe { font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; line-height: 1.5; }
+        .wireframe .wf-box { border: 2px solid #999; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; background: white; }
+        .wireframe .wf-box.header { background: #e2e8f0; border-color: #4a5568; }
+        .wireframe .wf-box.content { background: #f7fafc; }
+        .wireframe .wf-box.action { background: #ebf8ff; border-color: #3182ce; text-align: center; }
+        .wireframe .wf-box.error { background: #fff5f5; border-color: #fc8181; }
+        .wireframe .wf-box.dimmed { opacity: 0.6; border-style: dashed; }
+        .wireframe .wf-label { font-size: 10px; color: #718096; }
+        .wireframe .wf-element { margin: 4px 0; padding: 4px 8px; background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 3px; font-size: 11px; }
+        .wireframe .wf-grid { display: grid; gap: 6px; }
+        .wireframe .wf-grid-2 { grid-template-columns: 1fr 1fr; }
+        .wireframe .wf-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .wireframe .wf-section-title { font-weight: bold; font-size: 12px; color: #2d3748; margin: 12px 0 6px 0; }
+
+        /* 기능 명세 */
+        .spec-group { margin-bottom: 20px; }
+        .spec-group-title { font-weight: bold; color: #2d3748; font-size: 1.05em; margin-bottom: 8px; padding: 6px 10px; background: #edf2f7; border-left: 4px solid #4a5568; }
+        .spec-id { font-family: monospace; font-size: 0.85em; color: #718096; margin-left: 8px; }
+        .spec-item { margin-bottom: 6px; padding-left: 12px; }
+        .spec-item::before { content: "•"; color: #4a5568; margin-right: 6px; }
+
+        /* 상태 테이블 */
+        .state-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+        .state-table th { background: #4a5568; color: white; padding: 6px 10px; text-align: left; font-weight: bold; }
+        .state-table td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; }
+        .state-table tr:nth-child(even) { background: #f7fafc; }
+        .state-tag { display: inline-block; padding: 1px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+        .state-tag.hidden { background: #fed7d7; color: #c53030; }
+        .state-tag.loading { background: #fefcbf; color: #975a16; }
+        .state-tag.error { background: #fed7d7; color: #c53030; }
+        .state-tag.success { background: #c6f6d5; color: #276749; }
+
+        /* 개발자 노트 */
+        .dev-note { background: #fffff0; border: 1px solid #ecc94b; border-radius: 4px; padding: 12px; margin: 10px 0; }
+        .dev-note-title { font-weight: bold; color: #975a16; margin-bottom: 6px; font-size: 0.95em; }
+        .dev-note li { margin-bottom: 4px; }
+
+        /* 공통 테이블 */
+        .info-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+        .info-table th { background: #edf2f7; padding: 6px 10px; text-align: left; font-weight: bold; border: 1px solid #e2e8f0; }
+        .info-table td { padding: 6px 10px; border: 1px solid #e2e8f0; }
+        .info-table code { background: #edf2f7; padding: 1px 4px; border-radius: 2px; font-size: 11px; }
+
+        /* 구분선 */
+        .divider { border: none; border-top: 1px solid #e2e8f0; margin: 15px 0; }
+
+        /* 강조 */
+        .highlight { background: #fff3cd; padding: 1px 4px; border-radius: 2px; }
+        .tag-dynamic { background: #d4edda; color: #155724; padding: 1px 6px; border-radius: 3px; font-size: 11px; }
+        .tag-static { background: #e2e8f0; color: #4a5568; padding: 1px 6px; border-radius: 3px; font-size: 11px; }
+
+        /* 플로우 다이어그램 */
+        .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+        .flow-box { background: #ebf8ff; border: 1px solid #90cdf4; padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .flow-arrow { color: #4a5568; font-size: 16px; }
+
+        /* 인쇄 */
+        @media print {
+            body { background: white; font-size: 11px; }
+            .doc-container { padding: 0; }
+            .screen-section { border: 1px solid #999; page-break-inside: avoid; }
+            .two-col { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+<div class="doc-container">
+
+<!-- ==================== 표지 ==================== -->
+<div class="cover">
+    <h1>SVI Survey Web Service</h1>
+    <div class="subtitle">기능 명세 기획서</div>
+    <p style="color:#a0aec0; margin-bottom:40px;">Light-SVI 기업 자가진단 시스템</p>
+    <table class="info-table" style="width:auto; margin:0 auto; border:none;">
+        <tr><td class="label" style="border:none;">프로젝트</td><td style="border:none;">SVI Survey Web Service</td></tr>
+        <tr><td class="label" style="border:none;">기술 스택</td><td style="border:none;">React 18 + TypeScript + Vite + localStorage</td></tr>
+        <tr><td class="label" style="border:none;">화면 수</td><td style="border:none;">5개 (로그인, 설문, 결과, 관리자, 에러)</td></tr>
+        <tr><td class="label" style="border:none;">데이터 저장</td><td style="border:none;">브라우저 localStorage (백엔드 없음)</td></tr>
+    </table>
+</div>
+
+<!-- ==================== 목차 ==================== -->
+<div class="toc">
+    <h2>목차</h2>
+    <ul>
+        <li class="depth-1"><a href="#screen1">1. 로그인 (SVI-LOGIN-01)</a></li>
+        <li class="depth-1"><a href="#screen2">2. 설문 (SVI-SURVEY-02)</a></li>
+        <li class="depth-1"><a href="#screen3">3. 결과/보고서 (SVI-RESULT-03)</a></li>
+        <li class="depth-1"><a href="#screen4">4. 관리자 (SVI-ADMIN-04)</a></li>
+        <li class="depth-1"><a href="#screen5">5. 에러 (SVI-ERROR-05)</a></li>
+        <li class="depth-1"><a href="#common">6. 공통사항</a></li>
+        <li class="depth-2"><a href="#common-flow">6-1. 데이터 흐름도</a></li>
+        <li class="depth-2"><a href="#common-storage">6-2. localStorage 구조</a></li>
+        <li class="depth-2"><a href="#common-score">6-3. 점수 산출 공식</a></li>
+        <li class="depth-2"><a href="#common-ui">6-4. 공통 UI 패턴</a></li>
+    </ul>
+</div>
+
+<!-- ==================== 1. 로그인 ==================== -->
+<div class="screen-section" id="screen1">
+    <div class="screen-header">
+        <h2>1. 로그인</h2>
+        <div><span class="screen-id">SVI-LOGIN-01</span> &nbsp; <span class="screen-url">/login, /</span></div>
+    </div>
+    <div class="two-col">
+        <!-- 왼쪽: 와이어프레임 -->
+        <div class="col-left">
+            <div class="wireframe">
+                <div class="wf-section-title">전체 레이아웃</div>
+                <div class="wf-label">배경: 전체화면 / 중앙정렬 / max-width: 448px</div>
+
+                <div class="wf-box header" style="text-align:center;">
+                    <strong>로그인</strong><br>
+                    <span class="wf-label">직무역량 자가진단 시스템</span>
+                </div>
+
+                <div class="wf-box content">
+                    <div class="wf-label">이메일</div>
+                    <div class="wf-element">📧 이메일을 입력하세요 (type=email)</div>
+                    <div class="wf-label">비밀번호</div>
+                    <div class="wf-element">🔒 비밀번호를 입력하세요 (type=password)</div>
+                    <div class="wf-element" style="background:#fed7d7; display:none;">에러 메시지 영역 (조건부 표시)</div>
+                    <div class="wf-element" style="background:#4a5568; color:white; text-align:center;">로그인</div>
+                </div>
+
+                <div class="wf-label" style="text-align:center; margin:12px 0;">↕ 간격 64px</div>
+
+                <div class="wf-box dimmed">
+                    <div class="wf-label">테스트 계정으로 빠른 로그인 (opacity: 0.6 → hover: 1.0)</div>
+                    <div class="wf-grid wf-grid-2" style="margin-top:6px;">
+                        <div class="wf-element" style="text-align:center;">관리자 로그인</div>
+                        <div class="wf-element" style="text-align:center;">사용자 로그인</div>
+                    </div>
+                    <div class="wf-label" style="margin-top:6px;">
+                        관리자: admin@test.com / admin123<br>
+                        사용자: user@test.com / user123
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 기능 명세 -->
+        <div class="col-right">
+            <div class="spec-group">
+                <div class="spec-group-title">[기능 설명] <span class="spec-id">SVI-LOGIN-01-001</span></div>
+                <div class="spec-item">시스템 진입점. 이메일/비밀번호 인증 후 역할별 라우팅</div>
+                <div class="spec-item">관리자(admin) → <code>/admin</code> 으로 이동</div>
+                <div class="spec-item">일반 사용자(user) → <code>/survey</code> 로 이동</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[인증 방식] <span class="spec-id">SVI-LOGIN-01-002</span></div>
+                <div class="spec-item">하드코딩된 2개 계정으로 인증 (API 호출 없음, 동기식 처리)</div>
+                <div class="spec-item">인증 성공 시 <code>localStorage.currentUser</code>에 사용자 정보 저장</div>
+                <div class="spec-item">비밀번호는 평문 비교 (보안 미적용)</div>
+                <table class="info-table">
+                    <tr><th>역할</th><th>이메일</th><th>비밀번호</th><th>라우팅</th></tr>
+                    <tr><td>관리자</td><td><code>admin@test.com</code></td><td><code>admin123</code></td><td>/admin</td></tr>
+                    <tr><td>사용자</td><td><code>user@test.com</code></td><td><code>user123</code></td><td>/survey</td></tr>
+                </table>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[입력 필드 상세] <span class="spec-id">SVI-LOGIN-01-003</span></div>
+                <table class="info-table">
+                    <tr><th>필드</th><th>type</th><th>required</th><th>validation</th></tr>
+                    <tr><td>이메일</td><td>email</td><td>O</td><td>브라우저 기본 이메일 형식 체크</td></tr>
+                    <tr><td>비밀번호</td><td>password</td><td>O</td><td>없음 (최소 길이 제한 없음)</td></tr>
+                </table>
+                <div class="spec-item">Enter 키로 폼 제출 가능 (form onSubmit)</div>
+                <div class="spec-item">"비밀번호 보기" 토글 없음</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[에러 메시지] <span class="spec-id">SVI-LOGIN-01-004</span></div>
+                <table class="info-table">
+                    <tr><th>조건</th><th>메시지</th></tr>
+                    <tr><td>이메일/비밀번호 불일치</td><td>"이메일 또는 비밀번호가 올바르지 않습니다."</td></tr>
+                    <tr><td>빠른 로그인 실패</td><td>"로그인에 실패했습니다."</td></tr>
+                </table>
+                <div class="spec-item">에러 메시지는 다음 제출 시 자동 초기화</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[숨겨진 상태] <span class="spec-id">SVI-LOGIN-01-005</span></div>
+                <table class="state-table">
+                    <tr><th>상태</th><th>트리거</th><th>동작</th></tr>
+                    <tr><td><span class="state-tag error">에러</span></td><td>잘못된 인증 정보</td><td>빨간 박스에 에러 메시지 표시</td></tr>
+                    <tr><td><span class="state-tag hidden">브라우저 validation</span></td><td>빈 이메일/비밀번호</td><td>브라우저 기본 툴팁 표시</td></tr>
+                    <tr><td><span class="state-tag loading">AuthProvider 로딩</span></td><td>페이지 최초 로드</td><td>잠깐 loading: true (별도 로더 없음)</td></tr>
+                </table>
+            </div>
+
+            <div class="dev-note">
+                <div class="dev-note-title">⚠ 개발자 노트</div>
+                <ol>
+                    <li>로그인은 동기 처리 → 로딩 스피너 불필요</li>
+                    <li><code>localStorage</code> 삭제 시 자동 로그아웃됨</li>
+                    <li>테스트 카드는 프로덕션 배포 시 제거 또는 환경변수로 분기 필요</li>
+                    <li>세션 만료 개념 없음 (localStorage 유지되는 한 영구 로그인)</li>
+                    <li>이미 로그인 상태에서 /login 접근 시 자동 리다이렉트 없음 (로그인 폼 다시 표시)</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 2. 설문 ==================== -->
+<div class="screen-section" id="screen2">
+    <div class="screen-header">
+        <h2>2. 설문</h2>
+        <div><span class="screen-id">SVI-SURVEY-02</span> &nbsp; <span class="screen-url">/survey</span></div>
+    </div>
+    <div class="two-col">
+        <!-- 왼쪽: 와이어프레임 -->
+        <div class="col-left">
+            <div class="wireframe">
+                <div class="wf-label">고정: 로그아웃 버튼 (우상단, z-index: 50)</div>
+
+                <div class="wf-box header" style="text-align:center;">
+                    <strong>기업 자가진단 (초기창업형)</strong><br>
+                    <span class="wf-label">Light-SVI 진단툴</span><br>
+                    <span class="wf-label">[관리자 버튼 - admin만 표시]</span>
+                </div>
+
+                <div class="wf-box content">
+                    <div class="wf-grid wf-grid-3">
+                        <div class="wf-element">📅 일시 (date)</div>
+                        <div class="wf-element">🏢 기업명 (text)</div>
+                        <div class="wf-element">👤 작성자 (text)</div>
+                    </div>
+                    <div style="margin-top:8px; height:8px; background:#e2e8f0; border-radius:4px;">
+                        <div style="width:40%; height:100%; background:#7c9299; border-radius:4px;"></div>
+                    </div>
+                    <div class="wf-label">진행률 바: (응답 수 / 18) × 100%</div>
+                </div>
+
+                <div class="wf-section-title">기본 정보 (2문항)</div>
+                <div class="wf-box content">
+                    <div class="wf-label">과거 사업경험</div>
+                    <div class="wf-grid wf-grid-2">
+                        <div class="wf-element" style="text-align:center;">있다</div>
+                        <div class="wf-element" style="text-align:center;">없다</div>
+                    </div>
+                    <div class="wf-label" style="margin-top:4px;">해당 업계 종사 경험</div>
+                    <div class="wf-grid wf-grid-2">
+                        <div class="wf-element" style="text-align:center;">있다</div>
+                        <div class="wf-element" style="text-align:center;">없다</div>
+                    </div>
+                </div>
+
+                <div class="wf-section-title">설문 문항 (Q1~Q18)</div>
+                <div class="wf-box content">
+                    <div class="wf-label">라디오 타입 (Q1~Q15, Q4 제외)</div>
+                    <div style="display:flex; gap:4px; align-items:center;">
+                        <div style="width:36px; height:36px; background:#5a6f77; color:white; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:11px; font-weight:bold;">Q1</div>
+                        <div style="flex:1; font-size:10px;">질문 텍스트</div>
+                    </div>
+                    <div class="wf-element" style="margin-top:4px;">○ 보기 1</div>
+                    <div class="wf-element" style="background:#bee3f8; border-color:#3182ce;">● 보기 2 (선택됨)</div>
+                    <div class="wf-element">○ 보기 3</div>
+                    <div class="wf-element">○ 보기 4</div>
+                </div>
+
+                <div class="wf-box content">
+                    <div class="wf-label">체크박스 타입 (Q4만 해당)</div>
+                    <div class="wf-element">☑ 보기 1 (복수 선택 가능)</div>
+                    <div class="wf-element" style="background:#bee3f8; border-color:#3182ce;">☑ 보기 2</div>
+                    <div class="wf-element">☐ 보기 3</div>
+                </div>
+
+                <div class="wf-box content">
+                    <div class="wf-label">5점 척도 타입 (Q16, Q17, Q18)</div>
+                    <div class="wf-grid" style="grid-template-columns: repeat(5, 1fr);">
+                        <div class="wf-element" style="text-align:center; font-size:9px;">전혀<br>그렇지않다</div>
+                        <div class="wf-element" style="text-align:center; font-size:9px;">그렇지<br>않다</div>
+                        <div class="wf-element" style="text-align:center; font-size:9px; background:#3182ce; color:white;">보통</div>
+                        <div class="wf-element" style="text-align:center; font-size:9px;">그렇다</div>
+                        <div class="wf-element" style="text-align:center; font-size:9px;">매우<br>그렇다</div>
+                    </div>
+                </div>
+
+                <div class="wf-box error" style="display:block;">
+                    <div class="wf-label">에러 메시지 영역 (조건부 표시)</div>
+                </div>
+
+                <div class="wf-box action">
+                    <strong>제출 및 보고서 생성</strong>
+                </div>
+                <div class="wf-box dimmed" style="text-align:center;">
+                    자동채우기 (테스트용) - opacity: 0.6
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 기능 명세 -->
+        <div class="col-right">
+            <div class="spec-group">
+                <div class="spec-group-title">[기능 설명] <span class="spec-id">SVI-SURVEY-02-001</span></div>
+                <div class="spec-item">사회적기업 자가진단 설문 양식. 18개 문항 + 기본정보 2문항</div>
+                <div class="spec-item">신규 작성 및 수정 모드 지원</div>
+                <div class="spec-item">제출 시 결과 페이지(<code>/result/:surveyId</code>)로 이동</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[접근 제어] <span class="spec-id">SVI-SURVEY-02-002</span></div>
+                <div class="spec-item"><code>ProtectedRoute</code>로 감싸짐 → 미인증 시 <code>/login</code>으로 리다이렉트</div>
+                <div class="spec-item">관리자가 접근하면 <code>/admin</code>으로 자동 리다이렉트</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[기본정보 입력] <span class="spec-id">SVI-SURVEY-02-003</span></div>
+                <table class="info-table">
+                    <tr><th>필드</th><th>type</th><th>기본값</th><th>placeholder</th><th>필수</th></tr>
+                    <tr><td>일시</td><td>date</td><td>오늘 날짜</td><td>-</td><td>O</td></tr>
+                    <tr><td>기업명</td><td>text</td><td>빈 값</td><td>협동조합소셜랩</td><td>O</td></tr>
+                    <tr><td>작성자</td><td>text</td><td>빈 값</td><td>황유덕</td><td>O</td></tr>
+                </table>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[진행률 바] <span class="spec-id">SVI-SURVEY-02-004</span></div>
+                <div class="spec-item">수식: <code>(응답 완료 문항 수 / 18) × 100%</code></div>
+                <div class="spec-item">체크박스(Q4): 1개 이상 체크 시 응답 완료로 카운트</div>
+                <div class="spec-item">기본정보(기업명, 작성자)는 진행률에 미포함</div>
+                <div class="spec-item">애니메이션: transition-all (부드러운 너비 변화)</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[질문 유형] <span class="spec-id">SVI-SURVEY-02-005</span></div>
+                <table class="info-table">
+                    <tr><th>유형</th><th>해당 문항</th><th>선택 방식</th><th>값 범위</th></tr>
+                    <tr><td>Binary (있다/없다)</td><td>사업경험, 업계경험</td><td>단일 선택</td><td>"있다" / "없다"</td></tr>
+                    <tr><td>Radio</td><td>Q1~Q15 (Q4 제외)</td><td>단일 선택</td><td>1~4 또는 1~5 또는 1~6</td></tr>
+                    <tr><td>Checkbox</td><td>Q4</td><td>복수 선택</td><td>[1,2,3,4] 배열</td></tr>
+                    <tr><td>5점 척도</td><td>Q16, Q17, Q18</td><td>단일 선택</td><td>1~5</td></tr>
+                </table>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[질문 목록 상세] <span class="spec-id">SVI-SURVEY-02-006</span></div>
+                <table class="info-table">
+                    <tr><th>ID</th><th>유형</th><th>주제</th><th>보기 수</th><th>최대값</th></tr>
+                    <tr><td>q1</td><td>radio</td><td>사회적문제 해결방안 계획</td><td>4</td><td>4</td></tr>
+                    <tr><td>q2</td><td>radio</td><td>사업계획</td><td>4</td><td>4</td></tr>
+                    <tr><td>q3</td><td>radio</td><td>근로자 보건/안전</td><td>4</td><td>4</td></tr>
+                    <tr><td>q4</td><td>checkbox</td><td>사회적가치 (복수선택)</td><td>4</td><td>4개</td></tr>
+                    <tr><td>q5</td><td>radio</td><td>사회적경제기업 협력활동</td><td>4</td><td>4</td></tr>
+                    <tr><td>q6</td><td>radio</td><td>사회적경제기업 거래활동</td><td>4</td><td>4</td></tr>
+                    <tr><td>q7</td><td>radio</td><td>지역 네트워크활동</td><td>4</td><td>4</td></tr>
+                    <tr><td>q8</td><td>radio</td><td>사업이익 사회적환원</td><td>4</td><td>4</td></tr>
+                    <tr><td>q9</td><td>radio</td><td>사회서비스 제공</td><td>4</td><td>4</td></tr>
+                    <tr><td>q10</td><td>radio</td><td>주요의사결정기구</td><td>5</td><td>5</td></tr>
+                    <tr><td>q11</td><td>radio</td><td>고용계획</td><td>6</td><td>6</td></tr>
+                    <tr><td>q12</td><td>radio</td><td>법정의무교육</td><td>4</td><td>4</td></tr>
+                    <tr><td>q13</td><td>radio</td><td>대표자 교육</td><td>4</td><td>4</td></tr>
+                    <tr><td>q14</td><td>radio</td><td>비즈니스모델</td><td>6</td><td>6</td></tr>
+                    <tr><td>q15</td><td>radio</td><td>정부/지자체 지원사업</td><td>4</td><td>4</td></tr>
+                    <tr><td>q16</td><td>5점척도</td><td>핵심역량 새로운 시도</td><td>5</td><td>5</td></tr>
+                    <tr><td>q17</td><td>5점척도</td><td>경쟁 아이템 분석</td><td>5</td><td>5</td></tr>
+                    <tr><td>q18</td><td>5점척도</td><td>시장흐름 정기 점검</td><td>5</td><td>5</td></tr>
+                </table>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[제출 처리] <span class="spec-id">SVI-SURVEY-02-007</span></div>
+                <div class="spec-item"><strong>Validation 1:</strong> 기업명, 작성자 빈 값 체크 → "기업명과 작성자를 입력해주세요."</div>
+                <div class="spec-item"><strong>Validation 2:</strong> 18개 문항 모두 응답 체크 → "모든 문항에 답변해주세요."</div>
+                <div class="spec-item">통과 시 → 버튼 텍스트 "분석 중..."으로 변경 + 비활성화</div>
+                <div class="spec-item">500ms 지연 후 <code>/result/:surveyId</code>로 이동</div>
+                <div class="spec-item">ID 생성: <code>Date.now().toString()</code></div>
+                <div class="spec-item"><span class="highlight">주의: submitted 플래그는 여기서 설정되지 않음. 결과 페이지의 "제출" 버튼에서 설정됨</span></div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[수정 모드] <span class="spec-id">SVI-SURVEY-02-008</span></div>
+                <div class="spec-item">URL 파라미터: <code>/survey?edit={surveyId}</code></div>
+                <div class="spec-item">localStorage에서 해당 ID의 설문 데이터 로드</div>
+                <div class="spec-item">모든 입력 필드에 기존 응답값 자동 채움</div>
+                <div class="spec-item">제출 시 기존 데이터 업데이트 (새 레코드 생성 아님)</div>
+                <div class="spec-item"><code>updatedAt</code> 타임스탬프 추가</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[자동채우기] <span class="spec-id">SVI-SURVEY-02-009</span></div>
+                <div class="spec-item">테스트 전용 기능 (dimmed 스타일, opacity: 0.6)</div>
+                <div class="spec-item">랜덤 기업명/작성자 선택</div>
+                <div class="spec-item">모든 질문에 랜덤 값 자동 입력</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[숨겨진 상태] <span class="spec-id">SVI-SURVEY-02-010</span></div>
+                <table class="state-table">
+                    <tr><th>상태</th><th>트리거</th><th>동작</th></tr>
+                    <tr><td><span class="state-tag loading">로딩</span></td><td>제출 validation 통과</td><td>버튼 "분석 중...", disabled, 500ms 대기</td></tr>
+                    <tr><td><span class="state-tag error">입력 에러</span></td><td>기업명/작성자 미입력</td><td>"기업명과 작성자를 입력해주세요." 표시</td></tr>
+                    <tr><td><span class="state-tag error">응답 에러</span></td><td>미응답 문항 존재</td><td>"모든 문항에 답변해주세요." 표시</td></tr>
+                    <tr><td><span class="state-tag hidden">관리자 리다이렉트</span></td><td>관리자가 /survey 접근</td><td>자동으로 /admin으로 이동</td></tr>
+                    <tr><td><span class="state-tag loading">인증 로딩</span></td><td>ProtectedRoute 초기화</td><td>"로딩 중..." 텍스트 표시</td></tr>
+                    <tr><td><span class="state-tag hidden">수정 모드 실패</span></td><td>?edit=존재하지않는ID</td><td>에러 없이 빈 폼 표시 (silent failure)</td></tr>
+                </table>
+            </div>
+
+            <div class="dev-note">
+                <div class="dev-note-title">⚠ 개발자 노트</div>
+                <ol>
+                    <li><strong>자동저장 없음:</strong> 페이지 이탈 시 모든 입력 데이터 소실. 이탈 방지 confirm 없음</li>
+                    <li><strong>스크롤-투-에러 미구현:</strong> validation 실패 시 에러 메시지가 하단에 표시되나, 자동 스크롤되지 않음. 사용자가 에러를 못 볼 수 있음</li>
+                    <li><strong>surveyType 고정:</strong> "기업 자가진단 (초기창업형)" 하드코딩됨</li>
+                    <li><strong>localStorage 공유:</strong> 모든 사용자의 설문이 같은 <code>surveys</code> 키에 저장됨 (사용자별 분리 없음)</li>
+                    <li><strong>reset 함수 미연결:</strong> <code>handleReset()</code> 존재하나 UI 버튼에 연결되어 있지 않음</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 3. 결과/보고서 ==================== -->
+<div class="screen-section" id="screen3">
+    <div class="screen-header">
+        <h2>3. 결과/보고서</h2>
+        <div><span class="screen-id">SVI-RESULT-03</span> &nbsp; <span class="screen-url">/result/:surveyId</span></div>
+    </div>
+    <div class="two-col">
+        <!-- 왼쪽: 와이어프레임 -->
+        <div class="col-left">
+            <div class="wireframe">
+                <div class="wf-label">보고서: A4 크기 (210mm × 297mm)</div>
+                <div class="wf-label">고정: 로그아웃 버튼 (우상단)</div>
+
+                <div class="wf-box header" style="text-align:center;">
+                    <strong>입주기업 기초진단 결과보고서</strong>
+                </div>
+
+                <div class="wf-box content">
+                    <div class="wf-grid wf-grid-2">
+                        <div class="wf-element">기업명: {동적}</div>
+                        <div class="wf-element">자가진단일: {동적}</div>
+                    </div>
+                    <div class="wf-grid wf-grid-2">
+                        <div class="wf-element">담당: {동적}</div>
+                        <div class="wf-element">진단일: [date input]</div>
+                    </div>
+                </div>
+
+                <div class="wf-box" style="border:3px solid #000;">
+                    <div class="wf-label"><strong>요약 박스</strong></div>
+                    <div style="font-size:10px; margin-top:4px;">
+                        <span class="tag-dynamic">동적</span> "가장 취약한 영역은 {영역명}입니다"<br>
+                        <span class="tag-dynamic">동적</span> 취약/강점 세부 요인 분석<br>
+                        <span class="tag-dynamic">동적</span> 사업/업계경험 기반 텍스트
+                    </div>
+                </div>
+
+                <div class="wf-section-title">2단 레이아웃 (50:50)</div>
+                <div class="wf-grid wf-grid-2">
+                    <div>
+                        <div class="wf-box content" style="text-align:center;">
+                            <div class="wf-label">레이더 차트</div>
+                            <div style="width:80px; height:80px; border:2px solid #999; border-radius:50%; margin:8px auto; display:flex; align-items:center; justify-content:center; font-size:9px;">
+                                경영 재무<br>조직 SVI
+                            </div>
+                            <div class="wf-label">4분면 배경색 표시</div>
+                        </div>
+                        <div class="wf-box content" style="font-size:10px;">
+                            <div class="wf-label"><strong>상세 설명 박스 × 6</strong></div>
+                            <span class="tag-static">고정</span> [소셜미션/사업계획]<br>
+                            <span class="tag-static">고정</span> [사회적가치/협력/지역]<br>
+                            <span class="tag-static">고정</span> [사회환원]<br>
+                            <span class="tag-static">고정</span> [의사결정/고용/교육]<br>
+                            <span class="tag-static">고정</span> [비즈니스모델]<br>
+                            <span class="tag-static">고정</span> [성장잠재력/아이템/시장]
+                        </div>
+                    </div>
+                    <div>
+                        <div class="wf-box content" style="font-size:10px;">
+                            <div class="wf-label"><strong>진단결과</strong></div>
+                            <span class="tag-dynamic">동적 선택</span> 취약 영역별 5가지 텍스트 중 1개
+                        </div>
+                        <div class="wf-box content" style="font-size:10px;">
+                            <div class="wf-label"><strong>상세진단결과 (바 차트 × 13)</strong></div>
+                            <div style="margin:4px 0;">
+                                <span style="display:inline-block; width:50px; font-size:9px;">소셜미션</span>
+                                <span style="display:inline-block; width:60%; height:10px; background:#2563eb; border-radius:2px;"></span>
+                                <span style="font-size:9px;"> 3.75</span>
+                            </div>
+                            <div style="margin:4px 0;">
+                                <span style="display:inline-block; width:50px; font-size:9px;">지역협력</span>
+                                <span style="display:inline-block; width:30%; height:10px; background:#f59e0b; border-radius:2px;"></span>
+                                <span style="font-size:9px;"> 2.50</span>
+                            </div>
+                            <div style="margin:4px 0;">
+                                <span style="display:inline-block; width:50px; font-size:9px;">고용계획</span>
+                                <span style="display:inline-block; width:15%; height:10px; background:#dc2626; border-radius:2px;"></span>
+                                <span style="font-size:9px;"> 1.25</span>
+                            </div>
+                            <div class="wf-label">🔵 우수 🟡 양호 🔴 위험</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wf-box content">
+                    <div class="wf-label"><strong>의견 섹션</strong></div>
+                    <div class="wf-element">＜＜기업 의견＞＞ [textarea]</div>
+                    <div class="wf-element">＜＜종합 의견＞＞ [textarea]</div>
+                </div>
+
+                <div class="wf-box" style="text-align:center; font-size:10px; background:#f7fafc;">
+                    한국사회적기업진흥원 소셜캠퍼스온
+                </div>
+
+                <div class="wf-section-title">액션 버튼 바 (인쇄 시 숨김)</div>
+                <div class="wf-grid" style="grid-template-columns: repeat(5, 1fr);">
+                    <div class="wf-element" style="text-align:center; font-size:10px;">수정</div>
+                    <div class="wf-element" style="text-align:center; font-size:10px;">인쇄</div>
+                    <div class="wf-element" style="text-align:center; font-size:10px;">PDF</div>
+                    <div class="wf-element" style="text-align:center; font-size:10px;">관리자*</div>
+                    <div class="wf-element" style="text-align:center; font-size:10px;">제출**</div>
+                </div>
+                <div class="wf-label">* admin만 / ** user만</div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 기능 명세 -->
+        <div class="col-right">
+            <div class="spec-group">
+                <div class="spec-group-title">[기능 설명] <span class="spec-id">SVI-RESULT-03-001</span></div>
+                <div class="spec-item">설문 결과를 A4 보고서 형태로 표시</div>
+                <div class="spec-item">점수 계산, 차트 시각화, PDF/인쇄, 관리자 제출 기능 포함</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[데이터 로딩] <span class="spec-id">SVI-RESULT-03-002</span></div>
+                <div class="spec-item">URL에서 <code>surveyId</code> 추출 → localStorage에서 해당 설문 조회</div>
+                <table class="info-table">
+                    <tr><th>에러 조건</th><th>메시지</th></tr>
+                    <tr><td>surveyId 없음</td><td>"잘못된 접근입니다."</td></tr>
+                    <tr><td>localStorage에 surveys 없음</td><td>"저장된 설문이 없습니다."</td></tr>
+                    <tr><td>해당 ID 설문 없음</td><td>"설문을 찾을 수 없습니다."</td></tr>
+                    <tr><td>응답 데이터 없음</td><td>"설문 응답 데이터를 찾을 수 없습니다."</td></tr>
+                </table>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[바 차트 색상 기준] <span class="spec-id">SVI-RESULT-03-003</span></div>
+                <table class="info-table">
+                    <tr><th>점수 범위 (5점 만점 환산)</th><th>색상</th><th>라벨</th></tr>
+                    <tr><td style="background:#dbeafe;">≥ 3.5</td><td>#2563eb (파랑)</td><td>우수</td></tr>
+                    <tr><td style="background:#fef3c7;">≥ 2.0 ~ &lt; 3.5</td><td>#f59e0b (주황)</td><td>양호</td></tr>
+                    <tr><td style="background:#fee2e2;">&lt; 2.0</td><td>#dc2626 (빨강)</td><td>위험</td></tr>
+                </table>
+                <div class="spec-item">정규화 공식: <code>(원점수 / 최대값) × 5</code></div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[상세진단 바 차트 항목 (13개)] <span class="spec-id">SVI-RESULT-03-004</span></div>
+                <table class="info-table">
+                    <tr><th>표시명</th><th>원본</th><th>최대값</th><th>환산 공식</th></tr>
+                    <tr><td>소셜미션</td><td>q1</td><td>4</td><td>(q1/4)×5</td></tr>
+                    <tr><td>사업계획수립</td><td>q2</td><td>4</td><td>(q2/4)×5</td></tr>
+                    <tr><td>기업의 사회적가치</td><td>q4 (체크 수)</td><td>4</td><td>(개수/4)×5</td></tr>
+                    <tr><td>사회적경제기업 협력</td><td>q5</td><td>4</td><td>(q5/4)×5</td></tr>
+                    <tr><td>지역협력</td><td>q7</td><td>4</td><td>(q7/4)×5</td></tr>
+                    <tr><td>사회환원계획</td><td>q8</td><td>4</td><td>(q8/4)×5</td></tr>
+                    <tr><td>민주적 의사결정 구조</td><td>q10</td><td>5</td><td>(q10/5)×5</td></tr>
+                    <tr><td>고용계획</td><td>q11</td><td>6</td><td>(q11/6)×5</td></tr>
+                    <tr><td>내부역량향상</td><td>q13</td><td>4</td><td>(q13/4)×5</td></tr>
+                    <tr><td>비즈니스모델</td><td>q14</td><td>6</td><td>(q14/6)×5</td></tr>
+                    <tr><td>성장잠재력</td><td>q15</td><td>4</td><td>(q15/4)×5</td></tr>
+                    <tr><td>사업아이템</td><td>q16</td><td>5</td><td>(q16/5)×5</td></tr>
+                    <tr><td>시장분석</td><td>q17</td><td>5</td><td>(q17/5)×5</td></tr>
+                </table>
+                <div class="spec-item"><span class="highlight">미표시 항목:</span> q3, q6, q9, q12, q18은 영역 점수에는 포함되나 개별 바 차트에는 표시되지 않음</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[레이더 차트] <span class="spec-id">SVI-RESULT-03-005</span></div>
+                <div class="spec-item">Chart.js Radar 타입, 320×320px</div>
+                <div class="spec-item">축: 1~5점, 라벨에 점수값 표시 (카테고리명은 배경 4분면에 표시)</div>
+                <div class="spec-item">4분면 배경: 경영(파랑 35%), 재무(노랑 35%), 조직(초록 35%), SVI(보라 35%)</div>
+                <div class="spec-item">선: #333333, 포인트: 흰색 채움 + 검은 테두리</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[요약 텍스트 - 동적/고정 분류] <span class="spec-id">SVI-RESULT-03-006</span></div>
+                <table class="info-table">
+                    <tr><th>영역</th><th>구분</th><th>설명</th></tr>
+                    <tr><td>취약 영역명</td><td><span class="tag-dynamic">동적</span></td><td>4개 영역 중 최저점</td></tr>
+                    <tr><td>취약 세부 요인</td><td><span class="tag-dynamic">동적</span></td><td>18개 항목 중 최저점 항목명</td></tr>
+                    <tr><td>강점 세부 요인</td><td><span class="tag-dynamic">동적</span></td><td>18개 항목 중 최고점 항목명</td></tr>
+                    <tr><td>사업/업계 경험 텍스트</td><td><span class="tag-dynamic">동적</span></td><td>"있다"/"없다"에 따라 다른 문장</td></tr>
+                    <tr><td>설명 문장 구조</td><td><span class="tag-static">고정</span></td><td>"이 영역에 대한 집중적인 개선과..." 등</td></tr>
+                    <tr><td>6개 추천 박스</td><td><span class="tag-static">고정</span></td><td>항상 동일한 텍스트</td></tr>
+                    <tr><td>진단결과 텍스트</td><td><span class="tag-dynamic">동적 선택</span></td><td>취약 영역에 따라 5가지 중 1개 선택</td></tr>
+                </table>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[의견 섹션] <span class="spec-id">SVI-RESULT-03-007</span></div>
+                <table class="info-table">
+                    <tr><th>필드</th><th>제목</th><th>placeholder</th></tr>
+                    <tr><td>기업 의견</td><td>＜＜기업 의견＞＞</td><td>"기업의견을 입력하세요..."</td></tr>
+                    <tr><td>종합 의견</td><td>＜＜종합 의견＞＞</td><td>"종합의견을 입력하세요..."</td></tr>
+                </table>
+                <div class="spec-item"><span class="highlight">주의: 입력 내용은 localStorage에 저장되지 않음. 새로고침 시 소실</span></div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[액션 버튼] <span class="spec-id">SVI-RESULT-03-008</span></div>
+                <table class="info-table">
+                    <tr><th>버튼</th><th>표시 조건</th><th>동작</th></tr>
+                    <tr><td>수정</td><td>항상</td><td>submitted 초기화 후 <code>/survey?edit={id}</code>로 이동</td></tr>
+                    <tr><td>인쇄</td><td>항상</td><td><code>window.print()</code> 호출</td></tr>
+                    <tr><td>PDF</td><td>항상</td><td>html2canvas → jsPDF로 A4 PDF 생성 → 다운로드</td></tr>
+                    <tr><td>관리자</td><td>admin만</td><td><code>/admin</code>으로 이동</td></tr>
+                    <tr><td>제출</td><td>user만</td><td>확인 모달 표시 → 확인 시 submitted=true 설정</td></tr>
+                </table>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[제출 확인 모달] <span class="spec-id">SVI-RESULT-03-009</span></div>
+                <div class="spec-item">오버레이: 전체화면, 반투명 검정 (rgba(0,0,0,0.5)), z-index: 9999</div>
+                <div class="spec-item">제목: "결과 제출 확인"</div>
+                <div class="spec-item">본문: "이 결과를 제출하시겠습니까? 제출 후에는 관리자가 확인할 수 있습니다."</div>
+                <div class="spec-item">확인 시: <code>submitted: true</code>, <code>submittedAt: ISO timestamp</code> 저장</div>
+                <div class="spec-item">제출 완료 후: 버튼 "✓ 제출완료"로 변경 (disabled)</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[PDF 다운로드] <span class="spec-id">SVI-RESULT-03-010</span></div>
+                <div class="spec-item">html2canvas: scale 2배 (고해상도)</div>
+                <div class="spec-item">대상: <code>.report-page</code> 요소</div>
+                <div class="spec-item">PDF: A4 세로, 멀티페이지 지원</div>
+                <div class="spec-item">파일명: "기초진단결과보고서.pdf"</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[인쇄 모드] <span class="spec-id">SVI-RESULT-03-011</span></div>
+                <div class="spec-item">@media print 적용: A4, margin 8mm</div>
+                <div class="spec-item"><code>.no-print</code> 클래스 요소 숨김 (액션 버튼, 로그아웃)</div>
+                <div class="spec-item">보고서 페이지: 그림자 제거, 전체 너비</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[숨겨진 상태] <span class="spec-id">SVI-RESULT-03-012</span></div>
+                <table class="state-table">
+                    <tr><th>상태</th><th>트리거</th><th>동작</th></tr>
+                    <tr><td><span class="state-tag loading">로딩</span></td><td>데이터 조회 중</td><td>"결과를 불러오는 중..." 표시</td></tr>
+                    <tr><td><span class="state-tag error">에러 (4종)</span></td><td>데이터 미존재</td><td>각 조건별 에러 메시지 중앙 표시</td></tr>
+                    <tr><td><span class="state-tag success">제출 완료</span></td><td>제출 확인 후</td><td>"✓ 제출완료" 버튼 비활성화</td></tr>
+                    <tr><td><span class="state-tag hidden">모달</span></td><td>제출 버튼 클릭</td><td>확인 모달 오버레이 표시</td></tr>
+                    <tr><td><span class="state-tag hidden">인쇄 모드</span></td><td>window.print()</td><td>.no-print 숨김, 보고서만 표시</td></tr>
+                </table>
+            </div>
+
+            <div class="dev-note">
+                <div class="dev-note-title">⚠ 개발자 노트</div>
+                <ol>
+                    <li><strong>의견란 미저장:</strong> textarea 입력 내용이 localStorage에 저장되지 않음. 새로고침 시 데이터 소실</li>
+                    <li><strong>nameMap 불완전:</strong> getWeakestDetail/getStrongestDetail의 nameMap이 일부 키만 매핑. 미매핑 키는 영어 속성명으로 표시됨 (예: "socialCooperation")</li>
+                    <li><strong>html2canvas 한계:</strong> Chart.js canvas 요소가 완벽히 렌더링되지 않을 수 있음</li>
+                    <li><strong>"수정" 시 submitted 초기화:</strong> 수정 클릭 후 취소하면 제출 상태가 해제된 채로 남음</li>
+                    <li><strong>0 나누기:</strong> 응답 데이터가 손상된 경우 (undefined/null) <code>|| 0</code> fallback으로 NaN 방지하나 0점으로 표시될 수 있음</li>
+                    <li><strong>"새 설문" 버튼 없음:</strong> 결과 페이지에서 새 설문을 시작하려면 수동으로 /survey 접근 필요</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 4. 관리자 ==================== -->
+<div class="screen-section" id="screen4">
+    <div class="screen-header">
+        <h2>4. 관리자</h2>
+        <div><span class="screen-id">SVI-ADMIN-04</span> &nbsp; <span class="screen-url">/admin</span></div>
+    </div>
+    <div class="two-col">
+        <!-- 왼쪽: 와이어프레임 -->
+        <div class="col-left">
+            <div class="wireframe">
+                <div class="wf-label">고정: 로그아웃 버튼 (우상단)</div>
+
+                <div class="wf-box header">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong>관리자 페이지</strong><br>
+                            <span class="wf-label">전체 설문 목록 (N건) - 이름님</span>
+                        </div>
+                        <div class="wf-element" style="background:#dc2626; color:white; font-size:10px;">전체 삭제</div>
+                    </div>
+                </div>
+
+                <div class="wf-box content">
+                    <div class="wf-label">필터</div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:11px;">설문지 종류:</span>
+                        <div class="wf-element" style="flex:1;">▼ 전체 (N) / 기업 자가진단...</div>
+                    </div>
+                </div>
+
+                <div class="wf-box content">
+                    <table style="width:100%; font-size:10px; border-collapse:collapse;">
+                        <tr style="background:#f7fafc;">
+                            <th style="padding:4px; text-align:left; border-bottom:1px solid #e2e8f0;">제출일시</th>
+                            <th style="padding:4px; text-align:left; border-bottom:1px solid #e2e8f0;">자가진단일</th>
+                            <th style="padding:4px; text-align:left; border-bottom:1px solid #e2e8f0;">기업명</th>
+                            <th style="padding:4px; text-align:left; border-bottom:1px solid #e2e8f0;">작성자</th>
+                            <th style="padding:4px; text-align:left; border-bottom:1px solid #e2e8f0;">종류</th>
+                            <th style="padding:4px; text-align:left; border-bottom:1px solid #e2e8f0;">작업</th>
+                        </tr>
+                        <tr>
+                            <td style="padding:4px;">2024.02.05</td>
+                            <td style="padding:4px;">2024-02-05</td>
+                            <td style="padding:4px;">협동조합</td>
+                            <td style="padding:4px;">황유덕</td>
+                            <td style="padding:4px; font-size:9px;">기업 자가진단</td>
+                            <td style="padding:4px;">
+                                <span style="background:#3182ce; color:white; padding:1px 4px; border-radius:2px; font-size:9px;">보기</span>
+                                <span style="background:#e53e3e; color:white; padding:1px 4px; border-radius:2px; font-size:9px;">삭제</span>
+                            </td>
+                        </tr>
+                        <tr style="background:#f7fafc;">
+                            <td style="padding:4px;" colspan="6">...</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="wf-box error" style="text-align:center;">
+                    <div class="wf-label">빈 상태: "아직 제출된 설문이 없습니다."</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 기능 명세 -->
+        <div class="col-right">
+            <div class="spec-group">
+                <div class="spec-group-title">[기능 설명] <span class="spec-id">SVI-ADMIN-04-001</span></div>
+                <div class="spec-item">제출된 설문 목록을 테이블로 표시하는 관리자 대시보드</div>
+                <div class="spec-item">필터링, 개별/전체 삭제, 결과 보기 기능 제공</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[접근 제어] <span class="spec-id">SVI-ADMIN-04-002</span></div>
+                <div class="spec-item"><code>ProtectedRoute(requireAdmin=true)</code>로 감싸짐</div>
+                <div class="spec-item">일반 사용자: "접근 권한 없음" + <code>/survey</code> 링크 표시</div>
+                <div class="spec-item">미인증: <code>/login</code>으로 리다이렉트</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[데이터 로딩] <span class="spec-id">SVI-ADMIN-04-003</span></div>
+                <div class="spec-item">localStorage.surveys에서 <code>submitted === true</code>인 항목만 필터</div>
+                <div class="spec-item"><code>submittedAt</code> 기준 내림차순 정렬 (최신순)</div>
+                <div class="spec-item">데이터 없을 시 4개 샘플 데이터 자동 생성</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[필터 드롭다운] <span class="spec-id">SVI-ADMIN-04-004</span></div>
+                <div class="spec-item">"전체 (N건)" + 고유 surveyType별 옵션</div>
+                <div class="spec-item">현재 1개 타입만 존재: "기업 자가진단 (초기창업형)"</div>
+                <div class="spec-item">정확 일치(exact match)로 필터링</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[테이블 컬럼] <span class="spec-id">SVI-ADMIN-04-005</span></div>
+                <table class="info-table">
+                    <tr><th>컬럼</th><th>데이터</th><th>포맷</th></tr>
+                    <tr><td>제출일시</td><td>submittedAt</td><td><code>toLocaleString('ko-KR')</code></td></tr>
+                    <tr><td>자가진단일</td><td>date</td><td>YYYY-MM-DD</td></tr>
+                    <tr><td>기업명</td><td>companyName</td><td>원본 텍스트</td></tr>
+                    <tr><td>작성자</td><td>author</td><td>원본 텍스트</td></tr>
+                    <tr><td>설문지 종류</td><td>surveyType</td><td>원본 (없으면 "미분류")</td></tr>
+                    <tr><td>작업</td><td>-</td><td>[보기] [삭제] 버튼</td></tr>
+                </table>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[삭제 기능] <span class="spec-id">SVI-ADMIN-04-006</span></div>
+                <table class="info-table">
+                    <tr><th>유형</th><th>확인 메시지</th><th>동작</th></tr>
+                    <tr><td>단건 삭제</td><td>"이 설문을 삭제하시겠습니까?"</td><td>해당 설문 localStorage에서 제거</td></tr>
+                    <tr><td>전체 삭제</td><td>"모든 설문을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다."</td><td>localStorage.surveys 전체 삭제 → 샘플 재생성</td></tr>
+                </table>
+                <div class="spec-item"><span class="highlight">주의: 전체 삭제 시 미제출 설문(진행 중)도 함께 삭제됨</span></div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[숨겨진 상태] <span class="spec-id">SVI-ADMIN-04-007</span></div>
+                <table class="state-table">
+                    <tr><th>상태</th><th>트리거</th><th>동작</th></tr>
+                    <tr><td><span class="state-tag hidden">빈 상태</span></td><td>제출된 설문 0건</td><td>"아직 제출된 설문이 없습니다." 중앙 표시</td></tr>
+                    <tr><td><span class="state-tag hidden">필터 결과 없음</span></td><td>필터 적용 후 0건</td><td>빈 테이블 (별도 메시지 없음)</td></tr>
+                    <tr><td><span class="state-tag hidden">삭제 모달</span></td><td>삭제 버튼 클릭</td><td>확인 모달 오버레이</td></tr>
+                    <tr><td><span class="state-tag hidden">전체 삭제 모달</span></td><td>전체 삭제 클릭</td><td>확인 모달 오버레이</td></tr>
+                    <tr><td><span class="state-tag loading">인증 로딩</span></td><td>ProtectedRoute 초기화</td><td>"로딩 중..." 표시</td></tr>
+                    <tr><td><span class="state-tag error">권한 없음</span></td><td>비관리자 접근</td><td>"접근 권한 없음" + /survey 링크</td></tr>
+                    <tr><td><span class="state-tag hidden">삭제 후 재생성</span></td><td>전체 삭제 확인</td><td>샘플 데이터 4건 자동 생성</td></tr>
+                </table>
+            </div>
+
+            <div class="dev-note">
+                <div class="dev-note-title">⚠ 개발자 노트</div>
+                <ol>
+                    <li><strong>페이지네이션 없음:</strong> 설문 수가 많아지면 테이블이 무한 길어짐</li>
+                    <li><strong>정렬 컨트롤 없음:</strong> submittedAt 내림차순 고정 (테이블 헤더 클릭 정렬 미지원)</li>
+                    <li><strong>샘플 데이터 충돌:</strong> AuthProvider와 AdminResults에서 각각 다른 샘플 데이터를 생성함. 초기화 순서에 따라 불일치 가능</li>
+                    <li><strong>단건 삭제 범위:</strong> submitted 여부와 관계없이 전체 배열에서 삭제됨</li>
+                    <li><strong>"전체 삭제" 버튼:</strong> surveys.length > 0일 때만 표시</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 5. 에러 ==================== -->
+<div class="screen-section" id="screen5">
+    <div class="screen-header">
+        <h2>5. 에러 (404)</h2>
+        <div><span class="screen-id">SVI-ERROR-05</span> &nbsp; <span class="screen-url">/*</span></div>
+    </div>
+    <div class="two-col">
+        <!-- 왼쪽: 와이어프레임 -->
+        <div class="col-left">
+            <div class="wireframe">
+                <div class="wf-label">전체화면 / 중앙 정렬</div>
+                <div style="height:40px;"></div>
+                <div class="wf-box content" style="text-align:center; padding:40px;">
+                    <div style="font-size:16px; font-weight:bold; margin-bottom:8px;">페이지를 찾을 수 없습니다</div>
+                    <div style="font-size:11px; color:#718096; margin-bottom:16px;">요청하신 페이지가 존재하지 않습니다.</div>
+                    <div class="wf-element" style="display:inline-block; background:#4a5568; color:white; text-align:center;">로그인 페이지로 이동</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 기능 명세 -->
+        <div class="col-right">
+            <div class="spec-group">
+                <div class="spec-group-title">[기능 설명] <span class="spec-id">SVI-ERROR-05-001</span></div>
+                <div class="spec-item">정의되지 않은 URL 또는 라우터 에러 발생 시 표시되는 페이지</div>
+                <div class="spec-item">로그인 페이지로 돌아가는 링크 1개만 제공</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[렌더링 조건] <span class="spec-id">SVI-ERROR-05-002</span></div>
+                <table class="info-table">
+                    <tr><th>조건</th><th>설명</th></tr>
+                    <tr><td>404 (Not Found)</td><td>정의되지 않은 URL 접근 (catch-all route: <code>path="*"</code>)</td></tr>
+                    <tr><td>라우터 에러</td><td>라우팅된 컴포넌트 내 JS 에러 (errorElement)</td></tr>
+                </table>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[네비게이션] <span class="spec-id">SVI-ERROR-05-003</span></div>
+                <div class="spec-item"><code>&lt;a href="/login"&gt;</code> 태그 사용 (react-router Link 아님)</div>
+                <div class="spec-item">클릭 시 전체 페이지 리로드 → SPA 상태 초기화</div>
+                <div class="spec-item">자동 리다이렉트 타이머 없음</div>
+            </div>
+
+            <div class="spec-group">
+                <div class="spec-group-title">[숨겨진 상태] <span class="spec-id">SVI-ERROR-05-004</span></div>
+                <table class="state-table">
+                    <tr><th>상태</th><th>트리거</th><th>동작</th></tr>
+                    <tr><td><span class="state-tag error">404</span></td><td>잘못된 URL</td><td>에러 페이지 렌더링</td></tr>
+                    <tr><td><span class="state-tag error">JS 에러</span></td><td>컴포넌트 크래시</td><td>동일한 에러 페이지 렌더링</td></tr>
+                </table>
+            </div>
+
+            <div class="dev-note">
+                <div class="dev-note-title">⚠ 개발자 노트</div>
+                <ol>
+                    <li>routes.tsx에 인라인 함수로 정의됨 (별도 컴포넌트 파일 없음)</li>
+                    <li>에러 코드/상세 정보 표시 없음 (404와 500 구분 불가)</li>
+                    <li>&lt;a&gt; 태그로 인해 전체 리로드 → AuthProvider 재초기화</li>
+                    <li>인증 상태와 무관하게 동일한 화면 표시</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 6. 공통사항 ==================== -->
+<div class="screen-section" id="common">
+    <div class="screen-header">
+        <h2>6. 공통사항</h2>
+        <div><span class="screen-id">SVI-COMMON</span></div>
+    </div>
+    <div style="padding: 30px;">
+
+        <!-- 6-1. 데이터 흐름도 -->
+        <div id="common-flow" class="spec-group">
+            <div class="spec-group-title">[6-1. 데이터 흐름도] <span class="spec-id">SVI-COMMON-01</span></div>
+            <div class="flow">
+                <div class="flow-box">Login<br><span style="font-size:10px;">인증</span></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box" style="background:#c6f6d5;">Survey<br><span style="font-size:10px;">설문 작성/저장</span></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box" style="background:#bee3f8;">Result<br><span style="font-size:10px;">점수 계산/보고서</span></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box" style="background:#fefcbf;">Admin<br><span style="font-size:10px;">제출 목록 관리</span></div>
+            </div>
+            <table class="info-table" style="margin-top:15px;">
+                <tr><th>단계</th><th>저장 데이터</th><th>localStorage 키</th></tr>
+                <tr><td>Login</td><td>사용자 정보 (id, email, name, isAdmin)</td><td><code>currentUser</code></td></tr>
+                <tr><td>Survey</td><td>설문 데이터 (id, date, company, responses...)<br><span class="highlight">submitted: false 상태</span></td><td><code>surveys</code> (배열에 추가)</td></tr>
+                <tr><td>Result → 제출</td><td>submitted: true, submittedAt 타임스탬프 추가</td><td><code>surveys</code> (기존 항목 업데이트)</td></tr>
+                <tr><td>Admin</td><td>읽기 전용 (삭제만 가능)</td><td><code>surveys</code> (항목 제거)</td></tr>
+            </table>
+        </div>
+
+        <hr class="divider">
+
+        <!-- 6-2. localStorage 구조 -->
+        <div id="common-storage" class="spec-group">
+            <div class="spec-group-title">[6-2. localStorage 키 구조] <span class="spec-id">SVI-COMMON-02</span></div>
+            <table class="info-table">
+                <tr><th>키</th><th>타입</th><th>구조</th><th>설명</th></tr>
+                <tr>
+                    <td><code>currentUser</code></td>
+                    <td>JSON string</td>
+                    <td><code>{ id, email, name, isAdmin }</code></td>
+                    <td>현재 로그인 사용자. 로그인 시 설정, 로그아웃 시 삭제</td>
+                </tr>
+                <tr>
+                    <td><code>surveys</code></td>
+                    <td>JSON string (Array)</td>
+                    <td><code>[{ id, date, companyName, author, responses, surveyType, submitted, submittedAt, updatedAt }]</code></td>
+                    <td>전체 설문 배열. 모든 사용자 공유 (사용자별 분리 없음)</td>
+                </tr>
+            </table>
+
+            <div class="dev-note">
+                <div class="dev-note-title">⚠ localStorage 주의사항</div>
+                <ol>
+                    <li>브라우저/탭 간 동기화 없음 (같은 브라우저의 같은 도메인만 공유)</li>
+                    <li>용량 제한: 약 5~10MB (브라우저별 상이)</li>
+                    <li>사용자별 데이터 분리 없음 → 다른 사용자의 설문 데이터 접근 가능</li>
+                    <li>시크릿/프라이빗 모드에서는 세션 종료 시 삭제됨</li>
+                </ol>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- 6-3. 점수 산출 공식 -->
+        <div id="common-score" class="spec-group">
+            <div class="spec-group-title">[6-3. 점수 산출 공식] <span class="spec-id">SVI-COMMON-03</span></div>
+
+            <p style="margin-bottom:10px;"><strong>기본 원칙:</strong> 각 응답값을 <code>(값 / 해당 문항 최대값) × 5</code>로 5점 만점 환산 후 평균</p>
+
+            <table class="info-table">
+                <tr><th>영역</th><th>포함 문항</th><th>계산</th></tr>
+                <tr>
+                    <td><strong>경영</strong><br>(9개 항목)</td>
+                    <td>q1(/4), q2(/4), q6(/4), q13(/4), q14(/6), q15(/4), q16(/5), q17(/5), q18(/5)</td>
+                    <td>각 환산 후 9개 평균</td>
+                </tr>
+                <tr>
+                    <td><strong>재무</strong><br>(3개 항목)</td>
+                    <td>q8(/4), q15(/4), q16(/5)</td>
+                    <td>각 환산 후 3개 평균</td>
+                </tr>
+                <tr>
+                    <td><strong>조직</strong><br>(4개 항목)</td>
+                    <td>q3(/4), q10(/5), q11(/6), q12(/4)</td>
+                    <td>각 환산 후 4개 평균</td>
+                </tr>
+                <tr>
+                    <td><strong>SVI</strong><br>(10개 항목)</td>
+                    <td>q1(/4), q3(/4), q4(개수/4), q5(/4), q6(/4), q7(/4), q8(/4), q9(/4), q10(/5), q11(/6)</td>
+                    <td>각 환산 후 10개 평균</td>
+                </tr>
+            </table>
+
+            <div class="spec-item" style="margin-top:10px;"><strong>교차 항목:</strong> q1, q3, q6, q8, q10, q11, q15, q16은 여러 영역에서 중복 사용됨</div>
+
+            <p style="margin-top:15px; font-weight:bold;">상세 진단 바 차트 (13개 항목)</p>
+            <table class="info-table">
+                <tr><th>항목</th><th>원본</th><th>최대</th><th style="width:100px;">예시: 원점수 3</th></tr>
+                <tr><td>소셜미션</td><td>q1</td><td>4</td><td>(3/4)×5 = 3.75 <span style="color:#2563eb;">■ 우수</span></td></tr>
+                <tr><td>사업계획수립</td><td>q2</td><td>4</td><td>(3/4)×5 = 3.75 <span style="color:#2563eb;">■ 우수</span></td></tr>
+                <tr><td>기업의 사회적가치</td><td>q4 체크수</td><td>4</td><td>(2/4)×5 = 2.50 <span style="color:#f59e0b;">■ 양호</span></td></tr>
+                <tr><td>사회적경제기업 협력</td><td>q5</td><td>4</td><td>(3/4)×5 = 3.75 <span style="color:#2563eb;">■ 우수</span></td></tr>
+                <tr><td>지역협력</td><td>q7</td><td>4</td><td>(1/4)×5 = 1.25 <span style="color:#dc2626;">■ 위험</span></td></tr>
+                <tr><td>사회환원계획</td><td>q8</td><td>4</td><td>(3/4)×5 = 3.75 <span style="color:#2563eb;">■ 우수</span></td></tr>
+                <tr><td>민주적 의사결정 구조</td><td>q10</td><td>5</td><td>(3/5)×5 = 3.00 <span style="color:#f59e0b;">■ 양호</span></td></tr>
+                <tr><td>고용계획</td><td>q11</td><td>6</td><td>(3/6)×5 = 2.50 <span style="color:#f59e0b;">■ 양호</span></td></tr>
+                <tr><td>내부역량향상</td><td>q13</td><td>4</td><td>(3/4)×5 = 3.75 <span style="color:#2563eb;">■ 우수</span></td></tr>
+                <tr><td>비즈니스모델</td><td>q14</td><td>6</td><td>(3/6)×5 = 2.50 <span style="color:#f59e0b;">■ 양호</span></td></tr>
+                <tr><td>성장잠재력</td><td>q15</td><td>4</td><td>(3/4)×5 = 3.75 <span style="color:#2563eb;">■ 우수</span></td></tr>
+                <tr><td>사업아이템</td><td>q16</td><td>5</td><td>(3/5)×5 = 3.00 <span style="color:#f59e0b;">■ 양호</span></td></tr>
+                <tr><td>시장분석</td><td>q17</td><td>5</td><td>(3/5)×5 = 3.00 <span style="color:#f59e0b;">■ 양호</span></td></tr>
+            </table>
+        </div>
+
+        <hr class="divider">
+
+        <!-- 6-4. 공통 UI 패턴 -->
+        <div id="common-ui" class="spec-group">
+            <div class="spec-group-title">[6-4. 공통 UI 패턴] <span class="spec-id">SVI-COMMON-04</span></div>
+
+            <table class="info-table">
+                <tr><th>패턴</th><th>구현</th><th>적용 화면</th></tr>
+                <tr><td>로그아웃 버튼</td><td>고정 위치 (top-right), 흰색 원형, LogOut 아이콘, z-50</td><td>설문, 결과, 관리자</td></tr>
+                <tr><td>배경색</td><td>#f5f5f5 (전체 페이지)</td><td>전체</td></tr>
+                <tr><td>카드 스타일</td><td>white bg, rounded-lg, shadow</td><td>전체</td></tr>
+                <tr><td>주요 액션 버튼</td><td>bg: #4a5568 또는 #2d3748, white text</td><td>전체</td></tr>
+                <tr><td>위험 액션 버튼</td><td>bg: #dc2626 또는 #e53e3e, white text</td><td>관리자, 결과</td></tr>
+                <tr><td>에러 메시지</td><td>bg: #fed7d7, text: #c53030, rounded</td><td>로그인, 설문, 결과</td></tr>
+                <tr><td>모달 오버레이</td><td>고정 전체화면, bg rgba(0,0,0,0.5), z-50+</td><td>결과, 관리자</td></tr>
+                <tr><td>인증 로딩</td><td>"로딩 중..." 중앙 텍스트 (ProtectedRoute)</td><td>설문, 결과, 관리자</td></tr>
+            </table>
+
+            <p style="margin-top:15px; font-weight:bold;">모달 공통 구조</p>
+            <table class="info-table">
+                <tr><th>요소</th><th>스타일</th></tr>
+                <tr><td>오버레이</td><td>position: fixed, inset: 0, bg: rgba(0,0,0,0.5)</td></tr>
+                <tr><td>모달 박스</td><td>white, padding 32-40px, rounded-lg, shadow-xl, max-width 448-500px</td></tr>
+                <tr><td>제목</td><td>font-bold, text-xl, margin-bottom 16px</td></tr>
+                <tr><td>버튼 영역</td><td>flex, justify-end, gap 12px</td></tr>
+                <tr><td>취소 버튼</td><td>bg: #e2e8f0, text: #4a5568</td></tr>
+                <tr><td>확인 버튼</td><td>bg: 상황별 (파랑/빨강), text: white</td></tr>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+</div><!-- doc-container end -->
+</body>
+</html>
