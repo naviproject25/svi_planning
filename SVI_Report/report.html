@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVI 측정 결과 보고서 - 갓피플주식회사</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* 헤더 */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 18px;
+            color: #000;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #000;
+            border-radius: 0;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-icon {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-icon:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-back {
+            background: #000;
+            color: white;
+            border: none;
+        }
+
+        .btn-back:hover {
+            background: #2a2a2a;
+        }
+
+        /* 컨테이너 */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* 보고서 타이틀 */
+        .report-header {
+            background: white;
+            padding: 40px;
+            border-radius: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .report-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .report-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .report-meta {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .report-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .report-meta-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* 섹션 */
+        .section {
+            background: white;
+            padding: 40px;
+            border-radius: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 3px solid #000;
+        }
+
+        .section-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        /* 차트 그리드 */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .chart-container {
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-wrapper {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 0;
+        }
+
+        /* 점수 박스 */
+        .score-box {
+            text-align: center;
+            padding: 32px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+            color: white;
+            border-radius: 0;
+            margin-bottom: 24px;
+        }
+
+        .score-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .score-value {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .score-grade {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* 범례 */
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 0;
+        }
+
+        /* 관점별 성과 */
+        .perspective-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .perspective-card {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 0;
+            text-align: center;
+        }
+
+        .perspective-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .perspective-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .perspective-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .perspective-bar-fill {
+            height: 100%;
+            border-radius: 0;
+            transition: width 0.3s ease;
+        }
+
+        .perspective-bar-fill.social {
+            background: linear-gradient(90deg, #666, #555);
+        }
+
+        .perspective-bar-fill.economic {
+            background: linear-gradient(90deg, #888, #333);
+        }
+
+        .perspective-bar-fill.innovation {
+            background: linear-gradient(90deg, #777, #666);
+        }
+
+        /* 개선지표 테이블 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 14px;
+            color: #555;
+        }
+
+        td {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .indicator-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #f5f5f5;
+            color: #000;
+            border-radius: 0;
+            font-size: 13px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        /* 노트 박스 */
+        .note-box {
+            background: #f0f0f0;
+            border-left: 4px solid #555;
+            padding: 20px;
+            border-radius: 0;
+            margin-top: 32px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .note-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        /* 인쇄용 스타일 */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .header, .btn-icon {
+                display: none;
+            }
+
+            .section {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: 700;
+            color: rgba(0, 0, 0, 0.05);
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                사회적가치지표 포털
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="btn-icon" onclick="window.print()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                인쇄
+            </button>
+            <button class="btn-icon" onclick="downloadPDF()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                PDF 저장
+            </button>
+            <button class="btn-icon btn-back" onclick="goBack()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                목록으로
+            </button>
+        </div>
+    </header>
+
+    <!-- 컨테이너 -->
+    <div class="container">
+        <!-- 보고서 헤더 -->
+        <div class="report-header">
+            <div class="watermark">SVI</div>
+            <h1 class="report-title">2025년 경기도 SVI측정 컨설팅사업 측정 결과</h1>
+            <p class="report-subtitle">
+                2025년 경기도 SVI측정 컨설팅사업에 참여한 갓피플주식회사의 SVI 모의측정결과는 【탁월】등급입니다.<br>
+                이는 모든 사업영역에서 사회적가치 실현을 위한 체계적인 시스템을 갖추고 효과적인 활동이 이루어지고 있으며, 매우 높은 성과를 달성하고 있는 수준입니다.
+            </p>
+            <div class="report-meta">
+                <div class="report-meta-item">
+                    <span class="report-meta-label">기업명:</span>
+                    <span>갓피플주식회사</span>
+                </div>
+                <div class="report-meta-item">
+                    <span class="report-meta-label">대표자:</span>
+                    <span>홍길동</span>
+                </div>
+                <div class="report-meta-item">
+                    <span class="report-meta-label">측정일:</span>
+                    <span>2024년 2월 10일</span>
+                </div>
+                <div class="report-meta-item">
+                    <span class="report-meta-label">평가자:</span>
+                    <span>한국사회적기업진흥원</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 종합 평가 섹션 -->
+        <div class="section">
+            <h2 class="section-title">[ 종합 평가 ]</h2>
+
+            <div class="chart-grid">
+                <!-- 등급 성과 도넛 차트 -->
+                <div class="chart-container">
+                    <h3 class="chart-title">[ 등급 성과 ]</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="gradeChart"></canvas>
+                    </div>
+                    <div class="score-box" style="margin-top: 24px;">
+                        <div class="score-label">종합 점수</div>
+                        <div class="score-value">90.1</div>
+                        <div class="score-grade">탁월 등급</div>
+                    </div>
+                </div>
+
+                <!-- 전년도 등급별 평균 대비 성과 -->
+                <div class="chart-container">
+                    <h3 class="chart-title">[ 전년도 등급별 평균 대비 성과 ]</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="yearCompareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 업종별 평균 대비 성과 -->
+            <div class="chart-container">
+                <h3 class="chart-title">[ 업종별 평균 대비 성과 ]</h3>
+                <p style="text-align: center; color: #666; font-size: 14px; margin-bottom: 16px;">
+                    갓피플주식회사의 업종은 [ 사업시설 관리, 사업 지원 및 임대 서비스업(N) ]으로<br>
+                    24년 경기도 동종업종 점수보다 높은 수준입니다.
+                </p>
+                <div class="chart-wrapper">
+                    <canvas id="industryChart"></canvas>
+                </div>
+                <p style="text-align: center; color: #999; font-size: 13px; margin-top: 16px;">
+                    45점 미만<br>
+                    ※ 측정결과는 2025년의 사회적가치지표(SVI)에 준하여 진단한 모의측정 결과입니다.
+                </p>
+            </div>
+        </div>
+
+        <!-- 관점별 성과 섹션 -->
+        <div class="section">
+            <h2 class="section-title">[ 관점별 성과 ]</h2>
+            <p class="section-subtitle">
+                관점별 영역중 가장 달성률이 낮아 노력이 필요한 영역은 [ 경제적 성과 ]
+            </p>
+
+            <div class="perspective-grid">
+                <div class="perspective-card">
+                    <div class="perspective-label">사회적</div>
+                    <div class="perspective-value">59.0</div>
+                    <div class="perspective-bar">
+                        <div class="perspective-bar-fill social" style="width: 82.8%"></div>
+                    </div>
+                </div>
+                <div class="perspective-card">
+                    <div class="perspective-label">경제적</div>
+                    <div class="perspective-value">21.1</div>
+                    <div class="perspective-bar">
+                        <div class="perspective-bar-fill economic" style="width: 52.8%"></div>
+                    </div>
+                </div>
+                <div class="perspective-card">
+                    <div class="perspective-label">혁신</div>
+                    <div class="perspective-value">10.0</div>
+                    <div class="perspective-bar">
+                        <div class="perspective-bar-fill innovation" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-wrapper">
+                <canvas id="perspectiveBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 지표별 성과 섹션 -->
+        <div class="section">
+            <h2 class="section-title">[ 지표별 성과 ]</h2>
+
+            <div class="chart-container" style="max-width: 800px; margin: 0 auto;">
+                <div class="chart-wrapper">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 개선지표 의견 -->
+            <div style="margin-top: 48px;">
+                <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 16px;">[ 개선지표 의견 ]</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">지표</th>
+                            <th>의견</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="indicator-tag">지표4</span></td>
+                            <td>8개 사회적경제기업관과 협력관계를 구축하여 5점을 획득하였으나, 협력활동의 지속성과 정기성 확보를 위한 구체적인 계획 수립이 필요함.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="indicator-tag">지표5</span></td>
+                            <td>11개 지역사회 기관과 협력관계를 구축하여 5점을 획득하였으나, 협력내용의 실질 향상과 지속적 협력 방안 마련 필요.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="indicator-tag">지표12~13</span></td>
+                            <td>영업성과와 노동생산성의 성장률이 다소 낮은 수준으로 평가되었으며, 이를 개선하기 위해 영업성과 증대 전략 및 생산성 향상 방안 마련 필요.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="note-box">
+                <div class="note-title">본 자료는 「2025년 경기도 SVI측정 컨설팅사업」의 모의측정 결과로</div>
+                <div>
+                    !국사회적기업진흥원의 사회적가치(SVI) 측정 신청을 위한 교육지원 및 컨설팅 목적으로<br>
+                    작성되었습니다.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 등급 성과 도넛 차트
+        const gradeCtx = document.getElementById('gradeChart').getContext('2d');
+        new Chart(gradeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['갓피플주식회사', '탁월', '우수', '양호', '미흡', '취약'],
+                datasets: [{
+                    data: [90.1, 0, 0, 0, 0, 9.9],
+                    backgroundColor: [
+                        '#000',
+                        '#555',
+                        '#666',
+                        '#888',
+                        '#aaa',
+                        '#ccc'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + '점';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 전년도 등급별 평균 대비 성과 바 차트
+        const yearCtx = document.getElementById('yearCompareChart').getContext('2d');
+        new Chart(yearCtx, {
+            type: 'bar',
+            data: {
+                labels: ['갓피플주식회사', '탁월', '우수', '양호', '미흡', '취약'],
+                datasets: [{
+                    label: '점수',
+                    data: [90.1, 92.85, 80.81, 67.44, 50.49, 26.11],
+                    backgroundColor: [
+                        '#000',
+                        '#1a1a1a',
+                        '#1a1a1a',
+                        '#1a1a1a',
+                        '#1a1a1a',
+                        '#1a1a1a'
+                    ],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '점';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '점수: ' + context.parsed.y + '점';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 업종별 평균 대비 성과
+        const industryCtx = document.getElementById('industryChart').getContext('2d');
+        new Chart(industryCtx, {
+            type: 'bar',
+            data: {
+                labels: ['갓피플주식회사(90.1)', '농업, 임업 어업(A)', '제조업(C)', '건설업(F)', '도매 및 소매업(G)', '숙박 및 음식점업(I)', '출판, 영상, 방송통신 및 정보서비스업(J)', '금융 및 보험업(K)', '부동산업(L)', '전문, 과학 및 기술 서비스업(M)', '사업시설 관리, 사업 지원 및 임대 서비스업(N)', '교육 서비스업(P)', '보건업 및 사회복지 서비스업(Q)', '예술, 스포츠 및 여가관련 서비스업(R)', '협회 및 단체, 수리 및 기타 개인 서비스업(S)', '가구내 고용활동 및 달리 분류되지 않은 자가소비 생산활동(T)', '국제 및 외국기관(U)', '기타(기타)'],
+                datasets: [{
+                    label: '점수',
+                    data: [90.10, 53.30, 54.02, 44.00, 64.80, 49.80, 52.47, 46.77, 39.08, 61.80, 61.23, 53.99, 61.66, 61.49, 56.33, 61.40, 51.32, 54.90],
+                    backgroundColor: function(context) {
+                        return context.dataIndex === 0 ? '#000' : '#5ba3d0';
+                    },
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // 관점별 성과 바 차트
+        const perspectiveCtx = document.getElementById('perspectiveBarChart').getContext('2d');
+        new Chart(perspectiveCtx, {
+            type: 'bar',
+            data: {
+                labels: ['사회적', '경제적', '혁신'],
+                datasets: [{
+                    label: '갓피플주식회사',
+                    data: [59.0, 21.1, 10.0],
+                    backgroundColor: '#000',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 80
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // 레이더 차트
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: ['지표1(100.0)', '지표2(100.0)', '지표3(93.3)', '지표4(100.0)', '지표5(100.0)', '지표6(100.0)', '지표7(100.0)', '지표8(100.0)', '지표9(100.0)', '지표10(73.0)', '지표11(68.0)', '지표12(70.0)', '지표13(70.0)', '지표14(100.0)'],
+                datasets: [{
+                    label: '갓피플주식회사',
+                    data: [100, 100, 93.3, 100, 100, 100, 100, 100, 100, 73, 68, 70, 70, 100],
+                    fill: true,
+                    backgroundColor: 'rgba(196, 30, 58, 0.2)',
+                    borderColor: '#000',
+                    pointBackgroundColor: '#000',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#000',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20,
+                            callback: function(value) {
+                                return value;
+                            }
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        function goBack() {
+            window.location.href = 'admin-list.html';
+        }
+
+        function downloadPDF() {
+            alert('PDF 다운로드 기능은 실제 환경에서 서버 API를 통해 구현됩니다.');
+        }
+    </script>
+</body>
+</html>

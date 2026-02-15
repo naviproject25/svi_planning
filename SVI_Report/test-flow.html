@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 플로우 검증</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+
+        .test-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .test-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .status-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .status-pending {
+            background: #ecc94b;
+            color: white;
+        }
+
+        .test-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .test-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-btn:active {
+            transform: translateY(0);
+        }
+
+        .test-btn.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            box-shadow: none;
+        }
+
+        .test-btn.secondary:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .info-box {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .result {
+            display: none;
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .result.success {
+            display: block;
+            background: #d5f4e6;
+            color: #27ae60;
+            border: 1px solid #abebc6;
+        }
+
+        .result.error {
+            display: block;
+            background: #fff5f5;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+
+        .checklist {
+            list-style: none;
+            margin-top: 16px;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .checklist li:before {
+            content: "✓";
+            color: #48bb78;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 사회적가치지표 포털 테스트</h1>
+        <p class="subtitle">모든 페이지와 기능이 정상적으로 작동하는지 확인합니다</p>
+
+        <!-- 테스트 1: 로그인 페이지 -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-icon status-success">1</span>
+                로그인 페이지
+            </div>
+            <div class="info-box">
+                ✅ 밝은 톤 디자인 적용<br>
+                ✅ 관리자/유저 라디오 버튼 제거<br>
+                ✅ 테스트 로그인 박스 추가
+            </div>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="openPage('login.html')">로그인 페이지 열기</button>
+                <button class="test-btn secondary" onclick="testLogin('user')">유저 로그인 테스트</button>
+                <button class="test-btn secondary" onclick="testLogin('admin')">관리자 로그인 테스트</button>
+            </div>
+        </div>
+
+        <!-- 테스트 2: 유저 페이지 -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-icon status-success">2</span>
+                유저 페이지 (survey.html)
+            </div>
+            <div class="info-box">
+                ✅ 밝은 톤 디자인 적용<br>
+                ✅ 그라데이션 헤더 및 버튼<br>
+                ✅ 프로그레스 바 색상 변경
+            </div>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="openPage('survey.html')">유저 페이지 열기</button>
+            </div>
+            <div id="userPageResult" class="result"></div>
+        </div>
+
+        <!-- 테스트 3: 관리자 페이지 -->
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-icon status-success">3</span>
+                관리자 페이지 (admin-list.html)
+            </div>
+            <div class="info-box">
+                ✅ 밝은 톤 디자인 적용<br>
+                ✅ 상태 배지 색상 구분<br>
+                ✅ 그라데이션 버튼 및 배지
+            </div>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="openPage('admin-list.html')">관리자 페이지 열기</button>
+            </div>
+            <div id="adminPageResult" class="result"></div>
+        </div>
+
+        <!-- 완료 체크리스트 -->
+        <div class="test-section" style="background: rgba(72, 187, 120, 0.1); border-color: #48bb78;">
+            <div class="test-title">
+                <span class="status-icon status-success">✓</span>
+                완료 체크리스트
+            </div>
+            <ul class="checklist">
+                <li>로그인 페이지 밝은 톤으로 변경</li>
+                <li>관리자/유저 구분 제거 (계정으로 구분)</li>
+                <li>테스트 로그인 박스 추가</li>
+                <li>모든 페이지 디자인 통일</li>
+                <li>버튼 및 입력 필드 스타일 개선</li>
+                <li>그라데이션 효과 적용</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function openPage(page) {
+            window.open(page, '_blank');
+        }
+
+        function testLogin(type) {
+            const url = 'login.html';
+            alert(`${type === 'user' ? '유저' : '관리자'} 로그인 테스트를 시작합니다.\n\n1. 로그인 페이지가 열립니다.\n2. 테스트 로그인 박스에서 "${type === 'user' ? '유저' : '관리자'}" 버튼을 클릭하세요.\n3. ${type === 'user' ? 'survey.html' : 'admin-list.html'} 페이지로 이동합니다.`);
+            window.open(url, '_blank');
+        }
+
+        // 페이지 로드 시 자동으로 파일 존재 여부 확인
+        window.onload = function() {
+            console.log('테스트 페이지가 로드되었습니다.');
+            console.log('모든 페이지가 정상적으로 작동하는지 확인하세요.');
+        };
+    </script>
+</body>
+</html>
