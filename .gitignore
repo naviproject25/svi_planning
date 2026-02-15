@@ -6,6 +6,10 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
+# Dependencies
+node_modules/
+package-lock.json
+
 # Temp files
 *.tmp
 ~$*

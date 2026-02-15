@@ -553,23 +553,29 @@ export function Result() {
         {/* Info Cards */}
         <div style={{ padding: '32px' }}>
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: auth.user?.isAdmin ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)',
-            gap: '16px',
-            marginBottom: '32px'
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '12px 32px',
+            padding: '20px 24px',
+            background: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            marginBottom: '32px',
+            alignItems: 'center'
           }}>
-            <InfoCard label="기업명" value={result.companyName} />
-            <InfoCard label="담당자" value={result.author} />
-            <InfoCard label="진단일" value={result.date} />
+            <InfoInline label="기업명" value={result.companyName} />
+            <InfoInline label="담당자" value={result.author} />
+            <InfoInline label="멘토" value={result.mentor || ''} />
+            <InfoInline label="진단일" value={result.date} />
             {auth.user?.isAdmin && (
-              <InfoCard label="면담일" value="">
-                <input 
-                  type="date" 
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '500' }}>면담일</span>
+                <input
+                  type="date"
                   className="no-print-input"
                   style={{
-                    width: '100%',
-                    border: '2px solid #e2e8f0',
-                    padding: '8px 12px',
+                    border: '1px solid #e2e8f0',
+                    padding: '6px 10px',
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: '600',
@@ -577,7 +583,7 @@ export function Result() {
                     transition: 'all 0.2s'
                   }}
                 />
-              </InfoCard>
+              </div>
             )}
           </div>
 
@@ -1032,6 +1038,15 @@ export function Result() {
 
 // Helper Components
 
+function InfoInline({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '500' }}>{label}</span>
+      <span style={{ fontSize: '15px', color: '#1e293b', fontWeight: '700' }}>{value}</span>
+    </div>
+  );
+}
+
 function InfoCard({ label, value, children }: { label: string; value?: string; children?: React.ReactNode }) {
   return (
     <div style={{
@@ -1246,7 +1261,7 @@ function ActionButton({
     secondary: {
       background: 'white',
       color: '#475569',
-      border: '2px solid #cbd5e0'
+      border: '1.5px solid #cbd5e1'
     },
     success: {
       background: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',

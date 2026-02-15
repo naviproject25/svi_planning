@@ -86,7 +86,7 @@ export function Login() {
             marginBottom: '10px',
             color: '#2d3748'
           }}>
-            직무역량 자가진단
+            Light-SVI 진단 시스템
           </h1>
           <p style={{
             textAlign: 'center',

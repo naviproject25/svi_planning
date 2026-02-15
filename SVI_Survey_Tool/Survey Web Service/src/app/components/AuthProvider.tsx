@@ -17,10 +17,12 @@ const AuthContext = createContext<AuthContextType>({
 
 // 테스트 데이터 생성 함수
 function initializeTestData() {
+  // 기존 데이터에 mentor 필드가 없으면 갱신
   const surveysData = localStorage.getItem('surveys');
   if (surveysData) {
-    // 이미 데이터가 있으면 건너뛰기
-    return;
+    const existing = JSON.parse(surveysData);
+    const hasAllMentors = existing.every((s: any) => s.mentor);
+    if (hasAllMentors) return;
   }
 
   // 테스트 설문 데이터 생성
@@ -29,8 +31,9 @@ function initializeTestData() {
       id: 'test-survey-001',
       userId: 'user@test.com',
       date: '2025-02-01',
-      companyName: '(주)소셜벤처A',
+      companyName: '(주)대한민국사회적경제혁신센터',
       author: '김철수',
+      mentor: '장덕수',
       responses: {
         businessExp: '있다',
         industryExp: '있다',
@@ -62,6 +65,7 @@ function initializeTestData() {
       date: '2025-02-05',
       companyName: '협동조합 함께',
       author: '이영희',
+      mentor: '서일화',
       responses: {
         businessExp: '없다',
         industryExp: '있다',
@@ -93,6 +97,7 @@ function initializeTestData() {
       date: '2025-02-08',
       companyName: '사회적기업 미래',
       author: '박민수',
+      mentor: '이상기',
       responses: {
         businessExp: '있다',
         industryExp: '없다',
@@ -124,6 +129,7 @@ function initializeTestData() {
       date: '2025-02-10',
       companyName: '커뮤니티 비즈',
       author: '최지현',
+      mentor: '황유덕',
       responses: {
         businessExp: '있다',
         industryExp: '있다',
