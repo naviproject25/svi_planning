@@ -47,6 +47,7 @@ export function AdminResults() {
   const [newMentorName, setNewMentorName] = useState('');
   const [newMentorCategory, setNewMentorCategory] = useState<'기초' | '심화' | '공통'>('공통');
   const [apiSettings, setApiSettings] = useState<ApiSettings>({ provider: 'claude', apiKey: '' });
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const navigate = useNavigate();
   const auth = useAuth();
 
@@ -197,16 +198,16 @@ export function AdminResults() {
     XLSX.writeFile(wb, `SVI_진단결과_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('이 설문을 삭제하시겠습니까?')) {
-      const surveysData = localStorage.getItem('surveys');
-      if (surveysData) {
-        const parsedSurveys = JSON.parse(surveysData);
-        const filtered = parsedSurveys.filter((s: Survey) => s.id !== id);
-        localStorage.setItem('surveys', JSON.stringify(filtered));
-        loadSurveys();
-      }
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    const surveysData = localStorage.getItem('surveys');
+    if (surveysData) {
+      const parsedSurveys = JSON.parse(surveysData);
+      const filtered = parsedSurveys.filter((s: Survey) => s.id !== deleteTarget);
+      localStorage.setItem('surveys', JSON.stringify(filtered));
+      loadSurveys();
     }
+    setDeleteTarget(null);
   };
 
   return (
@@ -499,7 +500,7 @@ export function AdminResults() {
                           보기
                         </button>
                         <button
-                          onClick={() => handleDelete(survey.id)}
+                          onClick={() => setDeleteTarget(survey.id)}
                           className="px-3 py-1 text-sm rounded transition-all hover:opacity-80"
                           style={{ 
                             background: '#e53e3e',
@@ -517,6 +518,54 @@ export function AdminResults() {
           )}
         </div>
       </div>
+      {/* 삭제 확인 다이얼로그 */}
+      {deleteTarget && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 50000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0, 0, 0, 0.5)',
+          }}
+          onClick={() => setDeleteTarget(null)}
+        >
+          <div
+            style={{
+              background: 'white', borderRadius: '12px', padding: '32px',
+              maxWidth: '400px', width: '90%', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ fontSize: '1.1em', fontWeight: '700', color: '#2d3748', marginBottom: '8px' }}>
+              설문 삭제
+            </h3>
+            <p style={{ fontSize: '0.9em', color: '#718096', marginBottom: '24px', lineHeight: '1.5' }}>
+              이 설문을 삭제하시겠습니까?<br />삭제된 데이터는 복구할 수 없습니다.
+            </p>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setDeleteTarget(null)}
+                style={{
+                  padding: '8px 20px', borderRadius: '8px', fontSize: '0.9em',
+                  background: '#edf2f7', color: '#4a5568', border: 'none', cursor: 'pointer',
+                  fontWeight: '500',
+                }}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDelete}
+                style={{
+                  padding: '8px 20px', borderRadius: '8px', fontSize: '0.9em',
+                  background: '#e53e3e', color: 'white', border: 'none', cursor: 'pointer',
+                  fontWeight: '500',
+                }}
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
