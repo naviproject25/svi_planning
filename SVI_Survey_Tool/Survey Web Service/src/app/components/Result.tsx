@@ -477,15 +477,15 @@ export function Result() {
               <div style={{ fontSize: '15px', lineHeight: '1.8', color: '#475569', marginBottom: '16px' }}>
                 세부적으로 살펴보면 상대적으로 <strong>{weakestFactor.name}</strong> 요인이 낮습니다. 하지만{' '}
                 <strong style={{ color: '#10b981' }}>{strongestFactor.name}</strong>은 긍정적으로 높게 나타났습니다.{' '}
-                그리고 사업경험이{' '}
-                <strong style={{ color: result.responses.businessExp === '있다' ? '#10b981' : '#f59e0b' }}>
-                  {result.responses.businessExp === '있다' ? '있고' : '없고'}
+                그리고{' '}
+                <strong style={{ color: '#1e40af', background: '#dbeafe', padding: '2px 8px', borderRadius: '6px' }}>
+                  사업경험
+                </strong>이{' '}
+                {result.responses.businessExp === '있다' ? '있고' : '없고'}{' '}
+                <strong style={{ color: '#1e40af', background: '#dbeafe', padding: '2px 8px', borderRadius: '6px' }}>
+                  동종업종
                 </strong>{' '}
-                동종업종 경험은{' '}
-                <strong style={{ color: result.responses.industryExp === '있다' ? '#10b981' : '#f59e0b' }}>
-                  {result.responses.industryExp === '있다' ? '있음' : '없음'}
-                </strong>
-                을 확인하였습니다.
+                경험은 {result.responses.industryExp === '있다' ? '있음' : '없음'}을 확인하였습니다.
               </div>
             </div>
           </div>
