@@ -271,6 +271,7 @@ export function Survey() {
   const [companyName, setCompanyName] = useState('');
   const [author, setAuthor] = useState('');
   const [mentor, setMentor] = useState('');
+  const [companyOpinion, setCompanyOpinion] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [editMode, setEditMode] = useState(false);
@@ -303,6 +304,7 @@ export function Survey() {
           setCompanyName(surveyToEdit.companyName);
           setAuthor(surveyToEdit.author);
           setMentor(surveyToEdit.mentor);
+          setCompanyOpinion(surveyToEdit.companyOpinion || '');
           setResponses(surveyToEdit.responses);
         }
       }
@@ -332,7 +334,7 @@ export function Survey() {
   const handleSubmit = () => {
     // Check if all fields are filled
     if (!companyName || !author || !mentor) {
-      setError('기업명, 작성자, 멘토를 모두 입력해주세요.');
+      setError('기업명, 작성자, 담임멘토를 모두 입력해주세요.');
       return;
     }
 
@@ -364,6 +366,7 @@ export function Survey() {
             companyName,
             author,
             mentor,
+            companyOpinion,
             responses,
             updatedAt: new Date().toISOString()
           };
@@ -386,6 +389,7 @@ export function Survey() {
         companyName,
         author,
         mentor,
+        companyOpinion,
         responses,
         surveyType: 'light-svi', // 현재는 Light-SVI만 지원
         submittedAt: new Date().toISOString()
@@ -769,13 +773,13 @@ export function Survey() {
                 type="text"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="협동조합소셜랩"
+                placeholder="협동조합 가나다라"
                 className="w-full border rounded-md px-3 py-2 bg-white"
                 style={{ borderColor: '#cbd5e0', backgroundColor: 'white' }}
               />
             </div>
             <div>
-              <Label className="block text-sm font-medium mb-2" style={{ color: '#2d3748' }}>멘토: <span style={{ color: '#e53e3e' }}>*</span></Label>
+              <Label className="block text-sm font-medium mb-2" style={{ color: '#2d3748' }}>담임멘토: <span style={{ color: '#e53e3e' }}>*</span></Label>
               <select
                 value={mentor}
                 onChange={(e) => setMentor(e.target.value)}
@@ -783,7 +787,7 @@ export function Survey() {
                 style={{ borderColor: '#cbd5e0', backgroundColor: 'white', color: mentor ? '#2d3748' : '#a0aec0' }}
                 required
               >
-                <option value="" disabled>멘토를 선택해주세요</option>
+                <option value="" disabled>담임멘토를 선택해주세요</option>
                 <option value="장덕수">장덕수</option>
                 <option value="서일화">서일화</option>
                 <option value="이상기">이상기</option>
@@ -796,7 +800,7 @@ export function Survey() {
                 type="text"
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
-                placeholder="황유덕"
+                placeholder="홍길동"
                 className="w-full border rounded-md px-3 py-2 bg-white"
                 style={{ borderColor: '#cbd5e0', backgroundColor: 'white' }}
               />
@@ -829,6 +833,34 @@ export function Survey() {
           <div className="px-8 pt-2 space-y-6">
             {surveyQuestions.slice(2).map((question, index) => renderQuestion(question, index + 1))}
           </div>
+        </div>
+
+        {/* 기업 의견 입력 */}
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          padding: '24px 32px',
+          marginTop: '24px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          border: '1px solid #e2e8f0'
+        }}>
+          <h3 className="text-lg font-bold mb-2" style={{ color: '#2d3748' }}>기업 의견</h3>
+          <p className="text-sm mb-3" style={{ color: '#718096' }}>진단에 대한 기업의 의견이 있으시면 작성해주세요.</p>
+          <textarea
+            value={companyOpinion}
+            onChange={(e) => setCompanyOpinion(e.target.value)}
+            placeholder="기업 의견을 입력하세요..."
+            rows={4}
+            style={{
+              width: '100%',
+              padding: '12px',
+              border: '2px solid #e2e8f0',
+              borderRadius: '8px',
+              fontSize: '0.95em',
+              resize: 'vertical',
+              lineHeight: '1.6'
+            }}
+          />
         </div>
 
         {error && (

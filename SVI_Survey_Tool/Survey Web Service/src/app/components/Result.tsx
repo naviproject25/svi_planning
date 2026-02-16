@@ -100,6 +100,9 @@ export function Result() {
     }
 
     setResult(survey);
+    if (survey.companyOpinion) {
+      setCompanyOpinion(survey.companyOpinion);
+    }
     setLoading(false);
   }, [surveyId, navigate]);
 
@@ -565,7 +568,7 @@ export function Result() {
           }}>
             <InfoInline label="기업명" value={result.companyName} />
             <InfoInline label="담당자" value={result.author} />
-            <InfoInline label="멘토" value={result.mentor || ''} />
+            <InfoInline label="담임멘토" value={result.mentor || ''} />
             <InfoInline label="진단일" value={result.date} />
             {auth.user?.isAdmin && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -729,8 +732,8 @@ export function Result() {
                 {/* Diagnosis Text */}
                 <div>
                   <div style={{
-                    background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-                    border: '2px solid #fbbf24',
+                    background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 50%)',
+                    border: '2px solid #d97706',
                     borderRadius: '12px',
                     padding: '18px',
                     marginBottom: '14px'
@@ -741,7 +744,7 @@ export function Result() {
                       gap: '8px',
                       marginBottom: '10px'
                     }}>
-                      <AlertCircle size={20} color="#f59e0b" />
+                      <AlertCircle size={20} color="#b45309" />
                       <h4 style={{
                         fontSize: '15px',
                         fontWeight: '700',
@@ -881,7 +884,8 @@ export function Result() {
 
                 {/* Bar Chart Section */}
                 <div style={{
-                  paddingRight: '8px',
+                  paddingRight: '24px',
+                  paddingLeft: '8px',
                   overflow: 'hidden'
                 }}>
                   <div style={{
@@ -892,7 +896,7 @@ export function Result() {
                   }}>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <LegendBadge color="#3b82f6" label="우수" />
-                      <LegendBadge color="#f59e0b" label="양호" />
+                      <LegendBadge color="#d97706" label="양호" />
                       <LegendBadge color="#dc2626" label="개선" />
                     </div>
                   </div>
@@ -905,7 +909,7 @@ export function Result() {
                       if (normalizedValue >= 3.5) {
                         color = '#3b82f6';
                       } else if (normalizedValue >= 2) {
-                        color = '#f59e0b';
+                        color = '#d97706';
                       } else {
                         color = '#dc2626';
                       }
@@ -927,7 +931,7 @@ export function Result() {
                             <span style={{
                               fontSize: '14px',
                               fontWeight: '700',
-                              color: color
+                              color: '#111827'
                             }}>
                               {normalizedValue.toFixed(2)}
                             </span>
@@ -1083,25 +1087,25 @@ function InfoCard({ label, value, children }: { label: string; value?: string; c
 function ScoreBadge({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{
-      background: `${color}10`,
-      border: `2px solid ${color}30`,
+      background: `${color}15`,
+      border: `2px solid ${color}40`,
       borderRadius: '10px',
       padding: '12px',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center'
     }}>
-      <span style={{ 
-        fontSize: '14px', 
+      <span style={{
+        fontSize: '14px',
         fontWeight: '700',
-        color: color
+        color: '#1e293b'
       }}>
         {label}
       </span>
-      <span style={{ 
-        fontSize: '18px', 
+      <span style={{
+        fontSize: '18px',
         fontWeight: '800',
-        color: color
+        color: '#111827'
       }}>
         {value}
       </span>

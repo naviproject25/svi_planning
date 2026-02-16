@@ -86,8 +86,16 @@ export function Login() {
             marginBottom: '10px',
             color: '#2d3748'
           }}>
-            Light-SVI 진단 시스템
+            SVI기반 경영진단
           </h1>
+          <p style={{
+            textAlign: 'center',
+            marginBottom: '30px',
+            color: '#718096',
+            fontSize: '1em'
+          }}>
+            기초와 심화를 나눠야합니다. (2종)
+          </p>
 
           {error && (
             <div style={{
