@@ -355,7 +355,7 @@ export function AdminResults() {
 
                 {/* API 설정 */}
                 <div>
-                  <h3 className="text-sm font-bold mb-3" style={{ color: '#2d3748' }}>AI API 설정</h3>
+                  <h3 className="text-sm font-bold mb-3" style={{ color: '#2d3748' }}>AI Provider 설정</h3>
                   <select
                     value={apiSettings.provider}
                     onChange={(e) => {
