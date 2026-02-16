@@ -1,6 +1,8 @@
 import { createBrowserRouter } from "react-router";
 import { Login } from "./components/Login";
+import { SurveySelect } from "./components/SurveySelect";
 import { Survey } from "./components/Survey";
+import { SurveyAdvanced } from "./components/SurveyAdvanced";
 import { Result } from "./components/Result";
 import { AdminResults } from "./components/AdminResults";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -11,8 +13,8 @@ function ErrorPage() {
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4" style={{ color: '#2d3748' }}>페이지를 찾을 수 없습니다</h1>
         <p className="text-lg mb-8" style={{ color: '#718096' }}>요청하신 페이지가 존재하지 않습니다.</p>
-        <a 
-          href="/login" 
+        <a
+          href="/login"
           className="px-6 py-3 rounded-md text-white font-medium"
           style={{ background: '#4a5568' }}
         >
@@ -38,7 +40,25 @@ export const router = createBrowserRouter([
     path: "/survey",
     element: (
       <ProtectedRoute>
+        <SurveySelect />
+      </ProtectedRoute>
+    ),
+    errorElement: <ErrorPage />
+  },
+  {
+    path: "/survey/basic",
+    element: (
+      <ProtectedRoute>
         <Survey />
+      </ProtectedRoute>
+    ),
+    errorElement: <ErrorPage />
+  },
+  {
+    path: "/survey/advanced",
+    element: (
+      <ProtectedRoute>
+        <SurveyAdvanced />
       </ProtectedRoute>
     ),
     errorElement: <ErrorPage />

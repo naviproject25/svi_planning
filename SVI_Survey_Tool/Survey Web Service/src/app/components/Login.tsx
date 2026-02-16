@@ -94,7 +94,7 @@ export function Login() {
             color: '#718096',
             fontSize: '1em'
           }}>
-            기초와 심화를 나눠야합니다. (2종)
+            직무역량 자가진단 시스템
           </p>
 
           {error && (
