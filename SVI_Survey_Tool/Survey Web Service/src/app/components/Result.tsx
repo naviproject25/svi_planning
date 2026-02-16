@@ -143,15 +143,17 @@ export function Result() {
   const isBasic = surveyType === 'basic-svi';
   const scores: ScoringResult = calculateSVIScores(result.responses, surveyType);
 
-  // 취약/강점 범주
-  const sortedCategories = [...scores.categoryScores].sort((a, b) => a.score - b.score);
-  const weakestCategory = sortedCategories[0];
-  const strongestCategory = sortedCategories[sortedCategories.length - 1];
+  // 취약/강점 영역 (3개 관점 기준 - 엑셀 INDEX/MATCH와 동일: 동점 시 첫 번째 매칭)
+  const minPerspScore = Math.min(...scores.perspectiveScores.map(p => p.score));
+  const maxPerspScore = Math.max(...scores.perspectiveScores.map(p => p.score));
+  const weakestPerspective = scores.perspectiveScores.find(p => p.score === minPerspScore)!;
+  const strongestPerspective = scores.perspectiveScores.find(p => p.score === maxPerspScore)!;
 
-  // 취약/강점 요인
-  const sortedFactors = [...scores.factorScores].sort((a, b) => a.score - b.score);
-  const weakestFactor = sortedFactors[0];
-  const strongestFactor = sortedFactors[sortedFactors.length - 1];
+  // 취약/강점 요인 (그래프 요인 점수 기준 - 엑셀 INDEX/MATCH와 동일: 동점 시 첫 번째 매칭)
+  const minFactorScore = Math.min(...scores.graphFactorScores.map(f => f.score));
+  const maxFactorScore = Math.max(...scores.graphFactorScores.map(f => f.score));
+  const weakestFactor = scores.graphFactorScores.find(f => f.score === minFactorScore)!;
+  const strongestFactor = scores.graphFactorScores.find(f => f.score === maxFactorScore)!;
 
   // Radar Chart 데이터
   const chartData = {
@@ -221,13 +223,78 @@ export function Result() {
     },
   };
 
-  // 상세 코멘트 섹션 데이터 (범주별 그룹)
-  const categoryComments = CATEGORIES.map(catName => {
-    const catFactors = scores.factorScores.filter(f => f.category === catName);
-    return {
-      category: catName,
-      factors: catFactors,
-    };
+  // 상세 코멘트 섹션 데이터 (엑셀 결과보고서 B27-B56 / 심화진단 보고서 B27-B56 수식 그대로 적용)
+  const detailSections = isBasic ? [
+    {
+      header: '[소셜미션· 사업계획수립]',
+      factorNames: ['소셜미션', '성과관리체계'],
+      connectors: ['', ' '],
+    },
+    {
+      header: '[기업의 사회적가치·사회적경제기업협력·지역협력]',
+      factorNames: ['기업의 사회적가치', '사회적가치(다중)', '사회적경제기업 협력', '지역협력'],
+      connectors: ['', ' ', '. 또한, ', ' '],
+    },
+    {
+      header: '[사회환원]',
+      factorNames: ['사회환원'],
+      connectors: [''],
+    },
+    {
+      header: '[민주적 의사결정·고용·교육]',
+      factorNames: ['조직 거버넌스', '고용', '내부역량향상'],
+      connectors: ['', ' ', '. 그리고 '],
+    },
+    {
+      header: '[비즈니스모델과]',
+      factorNames: ['비즈니스모델', '경제적성과'],
+      connectors: ['', ' '],
+    },
+    {
+      header: '[성장잠재력·사업아이템·시장분석]',
+      factorNames: ['성장잠재력', '사업아이템', '시장분석'],
+      connectors: ['', ' ', ' '],
+    },
+  ] : [
+    {
+      header: '[소셜미션· 사업계획수립]',
+      factorNames: ['소셜미션', '소셜미션실천', '성과관리', '사업계획수립'],
+      connectors: ['', ' ', ' ', ' '],
+    },
+    {
+      header: '[기업의 사회적가치·사회적경제기업협력·지역협력]',
+      factorNames: ['근로자 보건 및 안전 운영', '사회적 가치 실천_근로자 권리', '사업의 사회적가치', '사회적경제기업 협력', '지역협력'],
+      connectors: ['', ' ', '. 외부로는 ', '. 또한, ', ' '],
+    },
+    {
+      header: '[사회환원]',
+      factorNames: ['사회환원계획', '사회적이익'],
+      connectors: ['', ' '],
+    },
+    {
+      header: '[민주적 의사결정·고용·교육]',
+      factorNames: ['민주적 의사결정 구조', '고용계획', '고용운영', '교육참여'],
+      connectors: ['', ' ', '. 그리고 ', ' 교육으로 '],
+    },
+    {
+      header: '[비즈니스모델]',
+      factorNames: ['비즈니스모델', '마케팅 계획', '고정매출'],
+      connectors: ['', ' ', ' 경제적성과는 '],
+    },
+    {
+      header: '[성장잠재력·사업아이템·시장분석]',
+      factorNames: ['성장잠재력', '아이템경쟁력', '혁신노력'],
+      connectors: ['', ' ', ' '],
+    },
+  ];
+
+  // 각 섹션의 요인 코멘트를 엑셀 수식대로 연결
+  const detailTexts = detailSections.map(section => {
+    const text = section.factorNames.map((name, i) => {
+      const factor = scores.factorScores.find(f => f.name === name);
+      return section.connectors[i] + (factor?.comment || '');
+    }).join('');
+    return { header: section.header, text };
   });
 
   return (
@@ -401,42 +468,25 @@ export function Result() {
                 <strong style={{ color: '#667eea', fontSize: '18px' }}>{result.companyName}</strong> 기업을{' '}
                 {isBasic ? '기초' : '심화'}진단한 결과 가장 취약한 영역은{' '}
                 <strong style={{ color: '#dc2626', background: '#fee2e2', padding: '2px 8px', borderRadius: '6px' }}>
-                  {weakestCategory.name}
-                </strong>
-                이며, 가장 우수한 영역은{' '}
-                <strong style={{ color: '#10b981', background: '#d1fae5', padding: '2px 8px', borderRadius: '6px' }}>
-                  {strongestCategory.name}
+                  {weakestPerspective.name}
                 </strong>
                 입니다.
               </div>
 
+              {/* 엑셀 결과보고서 B9 수식 그대로 적용 */}
               <div style={{ fontSize: '15px', lineHeight: '1.8', color: '#475569', marginBottom: '16px' }}>
-                세부적으로 살펴보면 상대적으로 <strong>{weakestFactor.name}</strong> 요인이 낮게 나타났으며,{' '}
-                <strong style={{ color: '#10b981' }}>{strongestFactor.name}</strong> 요인은 긍정적으로 높게 나타났습니다.
+                세부적으로 살펴보면 상대적으로 <strong>{weakestFactor.name}</strong> 요인이 낮습니다. 하지만{' '}
+                <strong style={{ color: '#10b981' }}>{strongestFactor.name}</strong>은 긍정적으로 높게 나타났습니다.{' '}
+                그리고 사업경험이{' '}
+                <strong style={{ color: result.responses.businessExp === '있다' ? '#10b981' : '#f59e0b' }}>
+                  {result.responses.businessExp === '있다' ? '있고' : '없고'}
+                </strong>{' '}
+                동종업종 경험은{' '}
+                <strong style={{ color: result.responses.industryExp === '있다' ? '#10b981' : '#f59e0b' }}>
+                  {result.responses.industryExp === '있다' ? '있음' : '없음'}
+                </strong>
+                을 확인하였습니다.
               </div>
-
-              <div style={{
-                fontSize: '15px', lineHeight: '1.8', color: '#475569',
-                background: '#f0f4ff', borderRadius: '12px', padding: '16px', border: '1px solid #c7d2fe',
-              }}>
-                <strong>Code [{scores.code}]</strong> : {scores.codeComment}
-              </div>
-
-              {/* 사업경험 */}
-              {result.responses.businessExp !== undefined && (
-                <div style={{ fontSize: '15px', lineHeight: '1.8', color: '#475569', marginTop: '16px' }}>
-                  사업경험은{' '}
-                  <strong style={{ color: result.responses.businessExp === '있다' ? '#10b981' : '#f59e0b' }}>
-                    {result.responses.businessExp === '있다' ? '있는' : '없는'}
-                  </strong> 것으로 확인되며, 동종업종 경험은{' '}
-                  <strong style={{ color: result.responses.industryExp === '있다' ? '#10b981' : '#f59e0b' }}>
-                    {result.responses.industryExp === '있다' ? '있어' : '없어'}
-                  </strong>
-                  {result.responses.industryExp === '있다'
-                    ? ', 업계에 대한 전문성과 네트워크를 보유하고 있습니다'
-                    : ', 해당 업계에 대한 시장 조사와 전문성 확보 노력이 필요합니다'}.
-                </div>
-              )}
             </div>
           </div>
 
@@ -460,11 +510,11 @@ export function Result() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                     <AlertCircle size={20} color="#b45309" />
                     <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#92400e', margin: 0 }}>
-                      취약 영역: {weakestCategory.name} ({weakestCategory.score.toFixed(2)}점)
+                      취약 영역: {weakestPerspective.name} ({weakestPerspective.score.toFixed(2)}점)
                     </h4>
                   </div>
                   <p style={{ fontSize: '13px', lineHeight: '1.6', color: '#78350f', margin: 0 }}>
-                    {weakestCategory.factorScores.map(f => f.comment).filter(Boolean).join(' ')}
+                    {scores.codeComment}
                   </p>
                 </div>
 
@@ -491,24 +541,22 @@ export function Result() {
               [상세]
             </h3>
             <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: '55% 45%', gap: '32px' }}>
-              {/* 범주별 코멘트 */}
+              {/* 엑셀 결과보고서 B27-B56 상세 섹션 */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {categoryComments.map(cc => (
-                  <div key={cc.category} className="detail-category-card" style={{
+                {detailTexts.map((section, idx) => (
+                  <div key={idx} className="detail-category-card" style={{
                     background: '#f8fafc', borderRadius: '12px', padding: '16px',
                     border: '1px solid #e2e8f0',
                   }}>
                     <h4 style={{
-                      fontSize: '14px', fontWeight: '700', color: CATEGORY_COLORS[cc.category] || '#1e293b',
+                      fontSize: '14px', fontWeight: '700', color: '#1e293b',
                       margin: '0 0 10px 0',
                     }}>
-                      {cc.category}
+                      {section.header}
                     </h4>
-                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#64748b', lineHeight: '1.6' }}>
-                      {cc.factors.filter(f => f.comment).map((f, i) => (
-                        <li key={i}><strong>{f.name}</strong>: {f.comment}</li>
-                      ))}
-                    </ul>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: '1.6' }}>
+                      {section.text}
+                    </p>
                   </div>
                 ))}
               </div>
