@@ -639,6 +639,33 @@ function getQuestionScore(
     return entry || { score: val, comment: '' };
   }
 
+  // 기초 q6: 엑셀 IF(SUM(Q35:Q38)=0,R35, =1,R36, =2,R37, else→R38)
+  // P값 [0.5,1,2,3.5] vs IF임계값 [0,1,2] → score=0.5일 때 else분기로 R38 반환
+  if (surveyType === 'basic-svi' && qKey === 'q6') {
+    const idx = (typeof answer === 'number' ? answer : parseInt(answer)) - 1;
+    if (isNaN(idx) || idx < 0 || idx >= table.length) return { score: 0, comment: '' };
+    const score = table[idx].score;
+    let comment: string;
+    if (score === 0) comment = table[0].comment;
+    else if (score === 1) comment = table[1].comment;
+    else if (score === 2) comment = table[2].comment;
+    else comment = table[3].comment;
+    return { score, comment };
+  }
+
+  // 기초 q12: 엑셀 IF(SUM(Q68:Q71)=0,R68, =0.5,R69, IF(=0,R70,R71))
+  // 세 번째 IF(=0)은 첫 번째와 중복 → R70 도달 불가 → score>=1이면 항상 R71
+  if (surveyType === 'basic-svi' && qKey === 'q12') {
+    const idx = (typeof answer === 'number' ? answer : parseInt(answer)) - 1;
+    if (isNaN(idx) || idx < 0 || idx >= table.length) return { score: 0, comment: '' };
+    const score = table[idx].score;
+    let comment: string;
+    if (score === 0) comment = table[0].comment;
+    else if (score === 0.5) comment = table[1].comment;
+    else comment = table[3].comment; // R71 (table[2]=R70은 도달 불가)
+    return { score, comment };
+  }
+
   // 일반 lookup: 응답값(1-based) → table[value-1]
   const idx = (typeof answer === 'number' ? answer : parseInt(answer)) - 1;
   if (isNaN(idx) || idx < 0 || idx >= table.length) {
@@ -673,7 +700,17 @@ function calculateFactorScore(
       break;
     case 'sum':
       score = qScores.reduce((acc, q) => acc + q.score, 0);
-      comment = qScores.map(q => q.comment).filter(Boolean).join(' ');
+      // 기초 내부역량향상(q12+q13): 엑셀 AC26에서 q12 score=0 또는 0.5일 때 q13 코멘트 제외
+      if (surveyType === 'basic-svi' && factor.name === '내부역량향상') {
+        const q12Score = qScores[0]?.score ?? 0;
+        if (q12Score === 0 || q12Score === 0.5) {
+          comment = qScores[0]?.comment ?? '';
+        } else {
+          comment = qScores.map(q => q.comment).filter(Boolean).join(' ');
+        }
+      } else {
+        comment = qScores.map(q => q.comment).filter(Boolean).join(' ');
+      }
       break;
     case 'average':
       score = qScores.reduce((acc, q) => acc + q.score, 0) / qScores.length;
