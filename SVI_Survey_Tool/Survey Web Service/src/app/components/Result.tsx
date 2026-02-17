@@ -357,10 +357,6 @@ export function Result() {
             page-break-inside: avoid;
           }
           .section-diagnosis {
-            break-before: page;
-            page-break-before: always;
-            break-inside: avoid;
-            page-break-inside: avoid;
             padding: 20px !important;
             margin-bottom: 20px !important;
           }
@@ -372,8 +368,6 @@ export function Result() {
             height: 260px !important;
           }
           .section-detail {
-            break-before: page;
-            page-break-before: always;
             padding: 20px !important;
             margin-bottom: 0 !important;
           }
@@ -387,8 +381,6 @@ export function Result() {
             page-break-inside: avoid;
           }
           .section-opinions {
-            break-before: page;
-            page-break-before: always;
           }
           .score-badges-grid {
             gap: 6px !important;
